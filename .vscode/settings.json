@@ -23,6 +23,10 @@
         "string_view": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "map": "cpp",
+        "iostream": "cpp",
+        "optional": "cpp",
+        "set": "cpp"
     }
 }

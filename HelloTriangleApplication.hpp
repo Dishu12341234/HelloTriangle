@@ -2,30 +2,85 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <vector>
+#include <optional>
 
 class HelloTriangleApplication
 {
 private:
     VkInstance instance;
 
+    struct QueueFamilyIndices
+    {
+        std::optional<uint32_t> graphicsFamily;
+        std::optional<uint32_t> presentFamily;
+
+        bool isComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
+    };
+
+    struct SwapChainSupportDetails
+    {
+        VkSurfaceCapabilitiesKHR capabilities;
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
+    };
+
+    VkSurfaceKHR surface;
+    VkQueue presentQueue;
+
+    VkPhysicalDevice physicalDevice;
+    VkDevice device;       // logical device
+    VkQueue graphicsQueue; // implicitly cleaned up
+
+    VkSwapchainKHR swapChain;
+
     void initWindow();
+
     void initVulkan();
     void createInstance();
+
     bool checkValidationLayerSupport();
+
+    void createSurface();
+
+    void pickPhysicalDevice();
+    int rateDeviceSuitablity(VkPhysicalDevice device);
+
+    void createLogicalDevice();
+
+    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+    bool isDeviceSuitable(VkPhysicalDevice device);
+    bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+    SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+
+    // Surface format
+    VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats);
+    
+
+    VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes);
+
+    VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capablities);
+
+    void createSwapChain();
+    //pick up from Retrieving the swap chain images
+    
+
     void mainLoop();
+
     void cleanup();
 
-    const int HEIGHT = 1080;
-    const int WIDTH = 1920;
+    const int WIDTH = 1080;
+    const int HEIGHT = 720;
 
     const std::vector<const char *> validationLayers = {
         "VK_LAYER_KHRONOS_validation"};
 
-    #ifndef NDEBUG
-        const bool enableValidationLayers = true;
-    #else
-        const bool enableValidationLayers = false;
-    #endif
+    std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
+#ifndef NDEBUG
+    const bool enableValidationLayers = true;
+#else
+    const bool enableValidationLayers = false;
+#endif
 
     GLFWwindow *_window;
 
