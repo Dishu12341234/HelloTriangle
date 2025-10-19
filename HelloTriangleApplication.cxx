@@ -27,6 +27,16 @@ void HelloTriangleApplication::initVulkan()
     pickPhysicalDevice();
     createLogicalDevice();
     createSwapChain();
+    createImageViews();
+
+    u_GraphicsPipelineCreateInfo createInfo{};
+    createInfo.device = device;
+    createInfo.height = HEIGHT;
+    createInfo.width = WIDTH;
+    createInfo.swapChainExtent = swapChainExtent;
+
+    graphicsPipeline.u_PassGraphicsPipelineCreateInfo(createInfo);
+    graphicsPipeline.createGraphicsPipeline();
 }
 
 void HelloTriangleApplication::createInstance()
@@ -430,6 +440,9 @@ void HelloTriangleApplication::createSwapChain()
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
     VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
+    swapChainImageFormat = surfaceFormat.format;
+    swapChainExtent = extent;
+
     //+1 FOr some reason
     uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
 
@@ -466,19 +479,57 @@ void HelloTriangleApplication::createSwapChain()
         createInfo.pQueueFamilyIndices = nullptr; // Optional
     }
 
-    //how to thransform the present
+    // how to thransform the present
     createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
 
-    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;//how shall this window blend with other windows
+    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR; // how shall this window blend with other windows
 
     createInfo.presentMode = presentMode;
-    createInfo.clipped = VK_TRUE;//don't care about the pixels that are not seen on the screen
+    createInfo.clipped = VK_TRUE; // don't care about the pixels that are not seen on the screen
 
-    createInfo.oldSwapchain = VK_NULL_HANDLE;//later stuff
+    createInfo.oldSwapchain = VK_NULL_HANDLE; // later stuff
 
-    if(vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain) != VK_SUCCESS)
+    if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create swap chain!");
+    }
+
+    vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
+    swapChainImages.resize(imageCount);
+    vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data());
+}
+
+void HelloTriangleApplication::createImageViews()
+{
+    swapChainImageViews.resize(swapChainImages.size());
+
+    for (size_t i = 0; i < swapChainImages.size(); i++)
+    {
+        VkImageViewCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        createInfo.image = swapChainImages[i];
+
+        // specifing how shall the images be interpreted
+        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        createInfo.format = swapChainImageFormat;
+
+        // mapping the color channels to defaults
+        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+        // specifing how shall the images be use(their purpose)
+        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; // color targets
+        createInfo.subresourceRange.baseMipLevel = 0;
+        createInfo.subresourceRange.levelCount = 1;
+        createInfo.subresourceRange.baseArrayLayer = 0;
+        createInfo.subresourceRange.layerCount = 1;
+
+        if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create image views");
+        }
     }
 }
 
@@ -492,7 +543,13 @@ void HelloTriangleApplication::mainLoop()
 
 void HelloTriangleApplication::cleanup()
 {
+    graphicsPipeline.destroyPipelineLayout();
 
+    for (auto imageView : swapChainImageViews)
+    {
+        vkDestroyImageView(device, imageView, nullptr);
+    }
+    swapChainImageViews.clear();
     vkDestroySwapchainKHR(device, swapChain, nullptr);
 
     vkDestroyDevice(device, nullptr);
@@ -517,6 +574,4 @@ void HelloTriangleApplication::run()
 
 HelloTriangleApplication::~HelloTriangleApplication()
 {
-    glfwDestroyWindow(_window);
-    glfwTerminate();
 }

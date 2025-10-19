@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <optional>
+#include "GraphicsPipeline.h"
 
 class HelloTriangleApplication
 {
@@ -32,6 +33,11 @@ private:
     VkQueue graphicsQueue; // implicitly cleaned up
 
     VkSwapchainKHR swapChain;
+    std::vector<VkImage> swapChainImages;// implicitly cleaned up
+    VkFormat swapChainImageFormat;
+    VkExtent2D swapChainExtent;
+
+    std::vector<VkImageView> swapChainImageViews;//explicit cleanup
 
     void initWindow();
 
@@ -61,8 +67,10 @@ private:
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capablities);
 
     void createSwapChain();
-    //pick up from Retrieving the swap chain images
-    
+    void createImageViews();
+
+
+    u_GraphicsPipeline graphicsPipeline;
 
     void mainLoop();
 
