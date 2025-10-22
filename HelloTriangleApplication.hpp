@@ -38,6 +38,11 @@ private:
     VkExtent2D swapChainExtent;
 
     std::vector<VkImageView> swapChainImageViews;//explicit cleanup
+    VkCommandPool commandPool;
+
+    VkSemaphore imageAvailableSemaphore;
+    VkSemaphore renderFinishedSemaphore;
+    VkFence inFlightFence;
 
     void initWindow();
 
@@ -66,13 +71,31 @@ private:
 
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capablities);
 
+    VkRenderPass renderPass;
+
+    std::vector<VkFramebuffer> swapChainFramebuffers;
+
+    VkCommandBuffer commandBuffer;
+
     void createSwapChain();
     void createImageViews();
+
+    void createRenderPass();
 
 
     u_GraphicsPipeline graphicsPipeline;
 
+    void createFramebuffers();
+    void createCommandPool();
+    void createCommandBuffer();
+
+    void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+
+    void createSyncObject();
+
     void mainLoop();
+
+    void drawFrame();
 
     void cleanup();
 

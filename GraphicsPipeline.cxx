@@ -11,6 +11,7 @@ u_GraphicsPipeline::~u_GraphicsPipeline()
 
 void u_GraphicsPipeline::destroyPipelineLayout()
 {
+    vkDestroyPipeline(device, graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 }
 
@@ -33,7 +34,7 @@ void u_GraphicsPipeline::createGraphicsPipeline()
     VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
     fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = vertShaderModule;
+    fragShaderStageInfo.module = fragShaderModule;
     fragShaderStageInfo.pName = "main";
 
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
@@ -109,17 +110,41 @@ void u_GraphicsPipeline::createGraphicsPipeline()
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
     colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment; 
+    colorBlending.pAttachments = &colorBlendAttachment;
 
-    //Pipeline Layout
+    // Pipeline Layout
     //(passing data to uniform objects in shaders)
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    
-    if(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+
+    if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create pipeline layout!");
+    }
 
+    // creating graphics pipeline
+    VkGraphicsPipelineCreateInfo pipelineInfo{};
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipelineInfo.stageCount = 2; // the shader stage count
+    pipelineInfo.pStages = shaderStages;
+
+    pipelineInfo.pVertexInputState = &vertexInputInfo;
+    pipelineInfo.pInputAssemblyState = &inputAssembly;
+    pipelineInfo.pViewportState = &viewportState;
+    pipelineInfo.pRasterizationState = &rasterizer;
+    pipelineInfo.pMultisampleState = &multisampling;
+    pipelineInfo.pDepthStencilState = nullptr; // disabled
+    pipelineInfo.pColorBlendState = &colorBlending;
+    // pipelineInfo.pDynamicState = &dynamic_state;
+
+    pipelineInfo.layout = pipelineLayout;
+
+    pipelineInfo.renderPass = renderPass; // passs the render pass
+    pipelineInfo.subpass = 0;
+
+    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create graphics pipeline!");
     }
 
     vkDestroyShaderModule(device, fragShaderModule, nullptr);
@@ -133,6 +158,7 @@ void u_GraphicsPipeline::u_PassGraphicsPipelineCreateInfo(u_GraphicsPipelineCrea
     height = pCreateInfo.height;
     width = pCreateInfo.width;
     swapChainExtent = pCreateInfo.swapChainExtent;
+    renderPass = pCreateInfo.renderPass;
 }
 
 std::vector<char> u_GraphicsPipeline::readFile(const std::string &filename)

@@ -11,7 +11,8 @@ struct u_GraphicsPipelineCreateInfo
 {
     VkDevice device;
     int height, width;
-    VkExtent2D swapChainExtent;;
+    VkExtent2D swapChainExtent;
+    VkRenderPass renderPass;
 };
 
 class u_GraphicsPipeline
@@ -21,9 +22,12 @@ private:
     int height, width;
     VkExtent2D swapChainExtent;
     VkPipelineLayout pipelineLayout;
-
-
-public:
+    VkRenderPass renderPass;
+    
+    
+    public:
+    VkPipeline graphicsPipeline;//shared
+    
     u_GraphicsPipeline();
     ~u_GraphicsPipeline();
     void destroyPipelineLayout();

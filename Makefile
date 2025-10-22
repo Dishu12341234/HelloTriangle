@@ -3,18 +3,18 @@ CXX := clang++
 CXXFLAGS := -std=c++2b -Wall -g -O0 \
              -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls \
              -I/opt/homebrew/Cellar/nlohmann-json/3.12.0/include/ \
-             -I/Users/divyanshundley/VulkanSDK/1.4.321.0/macOS/include \
+             -I/Users/home/VulkanSDK/1.4.321.0/macOS/include \
              -I/opt/homebrew/Cellar/glfw/3.4/include/
 
 LDFLAGS := \
   -L/usr/local/lib \
   -L/opt/homebrew/lib \
   -L./lib \
-  -L/Users/divyanshundley/VulkanSDK/1.4.321.0/macOS/lib \
+  -L/Users/home/VulkanSDK/1.4.321.0/macOS/lib \
   -lvulkan -lMoltenVK -lglfw \
   -framework Cocoa -framework IOKit -framework CoreFoundation \
   -framework QuartzCore -framework Metal \
-  -Wl,-rpath,/Users/divyanshundley/VulkanSDK/1.4.321.0/macOS/lib
+  -Wl,-rpath,/Users/home/VulkanSDK/1.4.321.0/macOS/lib
 
 # Sources and Outputs
 SRCS := $(wildcard *.cxx)
