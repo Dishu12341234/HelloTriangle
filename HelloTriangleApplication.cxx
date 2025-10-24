@@ -7,8 +7,14 @@
 #include <iostream>
 #include <limits>
 #include <algorithm>
+#include <chrono>
 #include <map>
 #include <set>
+
+std::vector<Vertex> vertices = {
+    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
 void HelloTriangleApplication::initWindow()
 {
@@ -42,7 +48,7 @@ void HelloTriangleApplication::initVulkan()
 
     createFramebuffers();
     createCommandPool();
-
+    createVertexBuffer();
     createCommandBuffers();
     createSyncObject();
 }
@@ -480,14 +486,14 @@ VkExtent2D HelloTriangleApplication::chooseSwapExtent(const VkSurfaceCapabilitie
 #endif
 }
 
-//In a swapchain we only use color images as that is all the is need to simply draw on the screen
-//Depth buffers and other stuff is handled in other places
+// In a swapchain we only use color images as that is all the is need to simply draw on the screen
+// Depth buffers and other stuff is handled in other places
 void HelloTriangleApplication::createSwapChain()
 {
     // ---- get the swapchain capabilities
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
-    //pick the best options
+    // pick the best options
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
     VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
@@ -496,12 +502,12 @@ void HelloTriangleApplication::createSwapChain()
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
 
-    //add one to allow triple buffering
-    //Metal limits the max to 3 so only +1 one is allowed while NVIDIA and AMD has no limits
+    // add one to allow triple buffering
+    // Metal limits the max to 3 so only +1 one is allowed while NVIDIA and AMD has no limits
     uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
 
     // Check to not exeed the maximum
-    //0 is a special number meaning that there is not upper limit
+    // 0 is a special number meaning that there is not upper limit
     if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
     {
         imageCount = swapChainSupport.capabilities.maxImageCount;
@@ -510,7 +516,6 @@ void HelloTriangleApplication::createSwapChain()
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     createInfo.surface = surface; // surface
-
 
     // ---- Image settings ----
     createInfo.minImageCount = imageCount;
@@ -524,8 +529,8 @@ void HelloTriangleApplication::createSwapChain()
     QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
     uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
-    //If not same then use concurrent which means that we dont have to worry about the manual ownership
-    //If same then use exclusive which is faster
+    // If not same then use concurrent which means that we dont have to worry about the manual ownership
+    // If same then use exclusive which is faster
     if (indices.graphicsFamily != indices.presentFamily)
     {
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -540,7 +545,7 @@ void HelloTriangleApplication::createSwapChain()
     }
 
     // how to transform the present
-    //IE: tell vulkan how to handle rotations. We just use what the windowing system provides
+    // IE: tell vulkan how to handle rotations. We just use what the windowing system provides
     createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR; // how shall this window blend with other windows
 
@@ -554,16 +559,16 @@ void HelloTriangleApplication::createSwapChain()
         throw std::runtime_error("failed to create swap chain!");
     }
 
-    // ---- Retrive the images ---- 
+    // ---- Retrive the images ----
     vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
     vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data());
 }
 
-//Images views: VkImage is just raw memory. Image views provide the GPU with all the neseccary context and information to present the data correctly
-//We did specify in the swapchain what formats and options to use, then why an image view?
-//Because a VkImage by itself proved no indication of the location and size of the contents
-//An Image view providies those important information to the GPU
+// Images views: VkImage is just raw memory. Image views provide the GPU with all the neseccary context and information to present the data correctly
+// We did specify in the swapchain what formats and options to use, then why an image view?
+// Because a VkImage by itself proved no indication of the location and size of the contents
+// An Image view providies those important information to the GPU
 
 void HelloTriangleApplication::createImageViews()
 {
@@ -580,7 +585,7 @@ void HelloTriangleApplication::createImageViews()
         createInfo.format = swapChainImageFormat;
 
         // mapping the color channels to defaults
-        //VK_COMPONENT_SWIZZLE_IDENTITY → use the original channel layout.
+        // VK_COMPONENT_SWIZZLE_IDENTITY → use the original channel layout.
         createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
         createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
         createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -600,10 +605,10 @@ void HelloTriangleApplication::createImageViews()
     }
 }
 
-//Render pass
-//It tells vulkan what attachment to use
-//How to use
-//Layout transitions
+// Render pass
+// It tells vulkan what attachment to use
+// How to use
+// Layout transitions
 void HelloTriangleApplication::createRenderPass()
 {
     // ---- describing what rescources we will be using ----
@@ -611,8 +616,8 @@ void HelloTriangleApplication::createRenderPass()
     colorAttachment.format = swapChainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;//what to do with the framebuffer after the render pass has started
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;//what to do with the memory(store it in the vram or not)
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;   // what to do with the framebuffer after the render pass has started
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // what to do with the memory(store it in the vram or not)
 
     // don't care about the stencil
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -657,7 +662,6 @@ void HelloTriangleApplication::createRenderPass()
     }
 }
 
-
 // ----creating framebuffers----
 void HelloTriangleApplication::createFramebuffers()
 {
@@ -684,8 +688,7 @@ void HelloTriangleApplication::createFramebuffers()
     }
 }
 
-
-//Allocator for command buffers
+// Allocator for command buffers
 void HelloTriangleApplication::createCommandPool()
 {
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
@@ -701,7 +704,59 @@ void HelloTriangleApplication::createCommandPool()
     }
 }
 
-//A command buffer is a queue of commands to send to the GPU
+void HelloTriangleApplication::createVertexBuffer()
+{
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = sizeof(vertices[0]) * vertices.size();
+    bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // need further explanation
+
+    if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create vertex buffer!");
+    }
+
+    // allocating memory for VBO
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    if (vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to allocate vertex buffer memory!");
+    }
+
+    vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+
+    // filling in the vertex buffer
+    void *data;
+    vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
+    memcpy(data, vertices.data(), (size_t)bufferInfo.size);
+    vkUnmapMemory(device, vertexBufferMemory);
+}
+
+uint32_t HelloTriangleApplication::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+{
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+    {
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+        {
+            return i;
+        }
+    }
+
+    throw std::runtime_error("failed to find suitable memory type!");
+}
+
+// A command buffer is a queue of commands to send to the GPU
 void HelloTriangleApplication::createCommandBuffers()
 {
     commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
@@ -710,7 +765,7 @@ void HelloTriangleApplication::createCommandBuffers()
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.commandPool = commandPool;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
+    allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
     if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
     {
@@ -746,7 +801,36 @@ void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer commandBuffer
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.graphicsPipeline);
 
-    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+    VkBuffer vertexBuffers[] = {vertexBuffer};
+    VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float t = std::chrono::duration<float>(currentTime - startTime).count(); // seconds
+
+    // Update vertex positions
+    // Circle radius
+    float radius = 0.5f;
+
+    // Update all three vertices to rotate around origin in a circle
+    vertices[0].pos.x = radius * std::cos(t);
+    vertices[0].pos.y = radius * std::sin(t);
+
+    vertices[1].pos.x = radius * std::cos(t + 2.0944f); // 120 degrees offset
+    vertices[1].pos.y = radius * std::sin(t + 2.0944f);
+
+    vertices[2].pos.x = radius * std::cos(t + 4.18879f); // 240 degrees offset
+    vertices[2].pos.y = radius * std::sin(t + 4.18879f);
+
+
+    // Copy to GPU buffer
+    void *data;
+    vkMapMemory(device, vertexBufferMemory, 0, sizeof(vertices[0]) * vertices.size(), 0, &data);
+    memcpy(data, vertices.data(), sizeof(vertices[0]) * vertices.size());
+    vkUnmapMemory(device, vertexBufferMemory);
+
+    std::cout << vertices[0].pos.x << std::endl;
+
+    vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
     vkCmdEndRenderPass(commandBuffer);
 
@@ -771,10 +855,12 @@ void HelloTriangleApplication::createSyncObject()
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
         if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
             vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-            vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+            vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
+        {
 
             throw std::runtime_error("failed to create synchronization objects for a frame!");
         }
@@ -792,8 +878,6 @@ void HelloTriangleApplication::mainLoop()
 
 void HelloTriangleApplication::drawFrame()
 {
-
-    
 
     // 1️⃣ Wait for previous frame to finish
     vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
@@ -856,7 +940,11 @@ void HelloTriangleApplication::cleanup()
 {
     vkDeviceWaitIdle(device);
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    vkDestroyBuffer(device, vertexBuffer, nullptr);
+    vkFreeMemory(device, vertexBufferMemory, nullptr);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
         vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
         vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
         vkDestroyFence(device, inFlightFences[i], nullptr);

@@ -3,9 +3,22 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <array>
 
 #include <vector>
 #include <fstream>
+
+struct Vertex {
+    glm::vec2 pos;
+    glm::vec3 color;
+
+    //Telling vulkan how to setup binding
+    //Struct 1/2
+    static VkVertexInputBindingDescription getBindingDescription();
+    //Struct 2/2
+    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions();
+};
 
 struct u_GraphicsPipelineCreateInfo
 {

@@ -10,6 +10,7 @@ class HelloTriangleApplication
 private:
 
     const int MAX_FRAMES_IN_FLIGHT = 3;
+    std::__1::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
 
     VkInstance instance;
 
@@ -47,6 +48,10 @@ private:
     std::vector<VkSemaphore> renderFinishedSemaphores;
     std::vector<VkFence> inFlightFences;
     uint32_t currentFrame = 0;
+
+    //Vertex Buffer(VBO)
+    VkBuffer vertexBuffer;
+    VkDeviceMemory vertexBufferMemory;
 
     void initWindow();
 
@@ -91,6 +96,8 @@ private:
 
     void createFramebuffers();
     void createCommandPool();
+    void createVertexBuffer();
+    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
     void createCommandBuffers();
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);

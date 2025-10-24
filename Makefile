@@ -3,8 +3,9 @@ CXX := clang++
 CXXFLAGS := -std=c++2b -Wall -g -O3 \
              -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls \
              -I/opt/homebrew/Cellar/nlohmann-json/3.12.0/include/ \
-             -I/Users/home/VulkanSDK/1.4.321.0/macOS/include \
-             -I/opt/homebrew/Cellar/glfw/3.4/include/
+             -I/Users/home/VulkanSDK/1.4.328.1/macOS/include \
+             -I/opt/homebrew/Cellar/glfw/3.4/include/ \
+			 -I/opt/homebrew/Cellar/glm/1.0.2/include
 
 LDFLAGS := \
   -L/usr/local/lib \

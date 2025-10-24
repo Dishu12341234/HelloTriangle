@@ -39,10 +39,15 @@ void u_GraphicsPipeline::createGraphicsPipeline()
 
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
+    auto bindingDescription = Vertex::getBindingDescription();
+    auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 0;
-    vertexInputInfo.vertexAttributeDescriptionCount = 0;
+    vertexInputInfo.vertexBindingDescriptionCount = 1;
+    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
     // input assembly
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
@@ -195,4 +200,45 @@ VkShaderModule u_GraphicsPipeline::createShaderModule(const std::vector<char> &c
     }
 
     return shaderModule;
+}
+
+// Telling vulkan how to pass data to the vertex shader once it's been uploaded into the GPU
+VkVertexInputBindingDescription Vertex::getBindingDescription()
+{
+    VkVertexInputBindingDescription bindingDescription{};
+    // A vertex binding describes at which rate to load data from memory throughout the verticies.
+    // It specifies the number of bytes between data entries and whether to move to the next data entery after each vertex or after each instance.
+
+    bindingDescription.binding = 0; // binding index to zero
+    bindingDescription.stride = sizeof(Vertex);
+    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // advance to the next input per vertex
+
+    return bindingDescription;
+}
+
+// this structure describies how to handle vertex input
+//each attribute required its own description
+std::array<VkVertexInputAttributeDescription, 2> Vertex::getAttributeDescriptions()
+{
+    std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+    attributeDescriptions[0].binding = 0;//same as getBindingDescription
+    attributeDescriptions[0].location = 0;//directly co-relates to 'layout(location = 0)' 
+    attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;//vec2
+    attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+    attributeDescriptions[1].binding = 0;
+    attributeDescriptions[1].location = 1;
+    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;//vec3
+    attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+    // Formats
+    //  float -> VK_FORMAT_R32_SFLOAT
+    //  vec2  -> VK_FORMAT_R32G32_SFLOAT
+    //  vec3  -> VK_FORMAT_R32G32B32_SFLOAT
+    //  vec4  -> VK_FORMAT_R32G32B32A32_SFLOAT
+    // ivec2  -> VK_FORMAT_R32G32_SINT
+    // uvec4  -> VK_FORMAT_R32G32B32A32_UINT
+    // double -> VK_FORMAT_R64_SFLOAT
+
+    return attributeDescriptions;
 }
