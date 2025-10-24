@@ -1,6 +1,6 @@
 # Compiler and Flags
 CXX := clang++
-CXXFLAGS := -std=c++2b -Wall -g -O0 \
+CXXFLAGS := -std=c++2b -Wall -g -O3 \
              -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls \
              -I/opt/homebrew/Cellar/nlohmann-json/3.12.0/include/ \
              -I/Users/home/VulkanSDK/1.4.321.0/macOS/include \

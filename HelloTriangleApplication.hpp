@@ -8,6 +8,9 @@
 class HelloTriangleApplication
 {
 private:
+
+    const int MAX_FRAMES_IN_FLIGHT = 3;
+
     VkInstance instance;
 
     struct QueueFamilyIndices
@@ -40,9 +43,10 @@ private:
     std::vector<VkImageView> swapChainImageViews;//explicit cleanup
     VkCommandPool commandPool;
 
-    VkSemaphore imageAvailableSemaphore;
-    VkSemaphore renderFinishedSemaphore;
-    VkFence inFlightFence;
+    std::vector<VkSemaphore> imageAvailableSemaphores;
+    std::vector<VkSemaphore> renderFinishedSemaphores;
+    std::vector<VkFence> inFlightFences;
+    uint32_t currentFrame = 0;
 
     void initWindow();
 
@@ -75,7 +79,7 @@ private:
 
     std::vector<VkFramebuffer> swapChainFramebuffers;
 
-    VkCommandBuffer commandBuffer;
+    std::vector<VkCommandBuffer> commandBuffers;
 
     void createSwapChain();
     void createImageViews();
@@ -87,7 +91,7 @@ private:
 
     void createFramebuffers();
     void createCommandPool();
-    void createCommandBuffer();
+    void createCommandBuffers();
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 

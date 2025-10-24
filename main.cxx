@@ -3,8 +3,13 @@
 #include <iostream>
 #include <cstdlib>
 
+//for PID
+#include <unistd.h>
 int main(int argc, char const *argv[])
 {
+    pid_t pid = getpid();
+    std::cout << "process ID: " << pid << std::endl;
+
     HelloTriangleApplication application;
 
     try
