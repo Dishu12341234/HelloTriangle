@@ -46,7 +46,8 @@
         "cstdarg": "cpp",
         "unordered_map": "cpp",
         "fstream": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "chrono": "cpp"
     },
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#1b1533",
