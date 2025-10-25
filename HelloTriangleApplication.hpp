@@ -52,6 +52,8 @@ private:
     //Vertex Buffer(VBO)
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
+    VkBuffer indexBuffer;
+    VkDeviceMemory indexBufferMemory;
 
     void initWindow();
 
@@ -88,19 +90,21 @@ private:
 
     void createSwapChain();
     void createImageViews();
-
     void createRenderPass();
-
-
+    
+    
     u_GraphicsPipeline graphicsPipeline;
-
+    
     void createFramebuffers();
     void createCommandPool();
-
+    
     void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
     void createVertexBuffer();
+    void createInfexBuffer();
+
     void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBufferm, VkDeviceSize size);
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
     void createCommandBuffers();
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
