@@ -21,8 +21,8 @@ LDFLAGS := \
 SRCS := $(wildcard *.cxx)
 OBJS := $(SRCS:.cxx=.o)
 
-MAC_EXEC := main_mac
-LINUX_EXEC := main_linux
+MAC_EXEC := main_mac.out
+LINUX_EXEC := main_linux.out
 UNAME_S := $(shell uname -s)
 
 # ANSI Colors
