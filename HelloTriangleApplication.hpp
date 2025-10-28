@@ -8,7 +8,6 @@
 class HelloTriangleApplication
 {
 private:
-
     const int MAX_FRAMES_IN_FLIGHT = 3;
     std::__1::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
 
@@ -37,11 +36,11 @@ private:
     VkQueue graphicsQueue; // implicitly cleaned up
 
     VkSwapchainKHR swapChain;
-    std::vector<VkImage> swapChainImages;// implicitly cleaned up
+    std::vector<VkImage> swapChainImages; // implicitly cleaned up
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
 
-    std::vector<VkImageView> swapChainImageViews;//explicit cleanup
+    std::vector<VkImageView> swapChainImageViews; // explicit cleanup
     VkCommandPool commandPool;
 
     std::vector<VkSemaphore> imageAvailableSemaphores;
@@ -49,11 +48,14 @@ private:
     std::vector<VkFence> inFlightFences;
     uint32_t currentFrame = 0;
 
-    //Vertex Buffer(VBO)
+    // Vertex Buffer(VBO)
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
+    std::vector<VkBuffer> uniformBuffers;
+    std::vector<VkDeviceMemory> uniformBuffersMemory;
+    std::vector<void *> uniformBuffersMapped;
 
     void initWindow();
 
@@ -76,11 +78,10 @@ private:
 
     // Surface format
     VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats);
-    
 
     VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes);
 
-    VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capablities);
+    VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capablities);
 
     VkRenderPass renderPass;
 
@@ -91,16 +92,24 @@ private:
     void createSwapChain();
     void createImageViews();
     void createRenderPass();
-    
-    
+
+    VkDescriptorSetLayout descriptorSetLayout;
+    void createDescriptorSetLayout();
+
     u_GraphicsPipeline graphicsPipeline;
-    
+
     void createFramebuffers();
     void createCommandPool();
-    
-    void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+
+    void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory);
     void createVertexBuffer();
-    void createInfexBuffer();
+    void createIndexBuffer();
+    void createUniformBuffers();
+    void createDescriptorPool();
+
+    VkDescriptorPool descriptorPool;
+    std::vector<VkDescriptorSet> descriptorSets;
+    void createDescriptorSets();
 
     void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBufferm, VkDeviceSize size);
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
@@ -112,6 +121,8 @@ private:
     void createSyncObject();
 
     void mainLoop();
+
+    void updateUniformBuffer(uint32_t currentImage);
 
     void drawFrame();
 
@@ -138,3 +149,7 @@ public:
     void run();
     ~HelloTriangleApplication();
 };
+
+// Future todos:
+// Allocate a single buffer and re use it later using offstes(Vertex buffer 2.4)
+// And also same for memory allocation(Vertex buffer 2.2)

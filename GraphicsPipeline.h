@@ -3,11 +3,20 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <array>
 
 #include <vector>
 #include <fstream>
+
+//UBO
+struct UniformBufferObject {
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 proj;
+};
 
 struct Vertex {
     glm::vec2 pos;
@@ -26,6 +35,7 @@ struct u_GraphicsPipelineCreateInfo
     int height, width;
     VkExtent2D swapChainExtent;
     VkRenderPass renderPass;
+    VkDescriptorSetLayout* descriptorSetLayout;
 };
 
 class u_GraphicsPipeline
@@ -34,11 +44,11 @@ private:
     VkDevice device;
     int height, width;
     VkExtent2D swapChainExtent;
-    VkPipelineLayout pipelineLayout;
     VkRenderPass renderPass;
-    
+    VkDescriptorSetLayout* descriptorSetLayout;
     
     public:
+    VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;//shared
     
     u_GraphicsPipeline();
