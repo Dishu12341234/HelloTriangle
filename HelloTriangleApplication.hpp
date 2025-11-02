@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <optional>
+#include "Textures.hpp"
 #include "GraphicsPipeline.h"
 
 class HelloTriangleApplication
@@ -93,6 +94,9 @@ private:
     void createImageViews();
     void createRenderPass();
 
+    VkCommandBuffer beginSingleTimeCommands();
+    void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+
     VkDescriptorSetLayout descriptorSetLayout;
     void createDescriptorSetLayout();
 
@@ -100,6 +104,8 @@ private:
 
     void createFramebuffers();
     void createCommandPool();
+
+    u_Texture texture;
 
     void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory);
     void createVertexBuffer();

@@ -21,12 +21,13 @@ struct UniformBufferObject {
 struct Vertex {
     glm::vec2 pos;
     glm::vec3 color;
+    glm::vec2 texCoord;
 
     //Telling vulkan how to setup binding
     //Struct 1/2
     static VkVertexInputBindingDescription getBindingDescription();
     //Struct 2/2
-    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions();
+    static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
 };
 
 struct u_GraphicsPipelineCreateInfo

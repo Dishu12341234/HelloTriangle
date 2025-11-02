@@ -220,19 +220,24 @@ VkVertexInputBindingDescription Vertex::getBindingDescription()
 }
 
 // this structure describies how to handle vertex input
-//each attribute required its own description
-std::array<VkVertexInputAttributeDescription, 2> Vertex::getAttributeDescriptions()
+// each attribute required its own description
+std::array<VkVertexInputAttributeDescription, 3> Vertex::getAttributeDescriptions()
 {
-    std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
-    attributeDescriptions[0].binding = 0;//same as getBindingDescription
-    attributeDescriptions[0].location = 0;//directly co-relates to 'layout(location = 0)' 
-    attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;//vec2
+    std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+    attributeDescriptions[0].binding = 0;                      // same as getBindingDescription
+    attributeDescriptions[0].location = 0;                     // directly co-relates to 'layout(location = 0)'
+    attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT; // vec2
     attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
     attributeDescriptions[1].binding = 0;
     attributeDescriptions[1].location = 1;
-    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;//vec3
+    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT; // vec3
     attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+    attributeDescriptions[2].binding = 0;
+    attributeDescriptions[2].location = 2;
+    attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+    attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
 
     // Formats
     //  float -> VK_FORMAT_R32_SFLOAT
