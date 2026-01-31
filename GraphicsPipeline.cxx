@@ -17,6 +17,8 @@ void u_GraphicsPipeline::destroyPipelineLayout()
 
 void u_GraphicsPipeline::createGraphicsPipeline()
 {
+    std::cout << "Creating Graphics Pipeline..." << std::endl;
+
     auto vertShaderCode = readFile("shaders/simple_shader_v.spv");
     auto fragShaderCode = readFile("shaders/simple_shader_f.spv");
 
@@ -103,8 +105,21 @@ void u_GraphicsPipeline::createGraphicsPipeline()
     // MSSA(disabled for now)
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampling.sampleShadingEnable = VK_FALSE;
-    multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    multisampling.sampleShadingEnable = VK_TRUE;
+    multisampling.rasterizationSamples = msaaSamples;
+    multisampling.minSampleShading = .2f;
+
+    VkPipelineDepthStencilStateCreateInfo depthStencil{};
+    depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depthStencil.depthTestEnable = VK_TRUE;
+    depthStencil.depthWriteEnable = VK_TRUE;
+    depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+    depthStencil.depthBoundsTestEnable = VK_FALSE;
+    depthStencil.minDepthBounds = 0.0f; // Optional
+    depthStencil.maxDepthBounds = 1.0f; // Optional
+    depthStencil.stencilTestEnable = VK_FALSE;
+    depthStencil.front = {}; // Optional
+    depthStencil.back = {};  // Optional
 
     /// color blending
     VkPipelineColorBlendAttachmentState colorBlendAttachment{};
@@ -124,6 +139,14 @@ void u_GraphicsPipeline::createGraphicsPipeline()
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = descriptorSetLayout;
 
+    VkPushConstantRange pushConstatn;
+    pushConstatn.offset = 0;
+    pushConstatn.size = sizeof(PushConstantC1);
+    pushConstatn.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    pipelineLayoutInfo.pPushConstantRanges = &pushConstatn;
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
+
     if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create pipeline layout!");
@@ -140,7 +163,7 @@ void u_GraphicsPipeline::createGraphicsPipeline()
     pipelineInfo.pViewportState = &viewportState;
     pipelineInfo.pRasterizationState = &rasterizer;
     pipelineInfo.pMultisampleState = &multisampling;
-    pipelineInfo.pDepthStencilState = nullptr; // disabled
+    pipelineInfo.pDepthStencilState = &depthStencil; // disabled
     pipelineInfo.pColorBlendState = &colorBlending;
     // pipelineInfo.pDynamicState = &dynamic_state;
 
@@ -167,6 +190,7 @@ void u_GraphicsPipeline::u_PassGraphicsPipelineCreateInfo(u_GraphicsPipelineCrea
     swapChainExtent = pCreateInfo.swapChainExtent;
     renderPass = pCreateInfo.renderPass;
     descriptorSetLayout = pCreateInfo.descriptorSetLayout;
+    msaaSamples = pCreateInfo.msaaSamples;
 }
 
 std::vector<char> u_GraphicsPipeline::readFile(const std::string &filename)
@@ -224,9 +248,9 @@ VkVertexInputBindingDescription Vertex::getBindingDescription()
 std::array<VkVertexInputAttributeDescription, 3> Vertex::getAttributeDescriptions()
 {
     std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
-    attributeDescriptions[0].binding = 0;                      // same as getBindingDescription
-    attributeDescriptions[0].location = 0;                     // directly co-relates to 'layout(location = 0)'
-    attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT; // vec2
+    attributeDescriptions[0].binding = 0;                         // same as getBindingDescription
+    attributeDescriptions[0].location = 0;                        // directly co-relates to 'layout(location = 0)'
+    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT; // vec3
     attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
     attributeDescriptions[1].binding = 0;

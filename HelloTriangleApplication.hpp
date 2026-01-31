@@ -3,14 +3,17 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <optional>
+#include <chrono>
 #include "Textures.hpp"
 #include "GraphicsPipeline.h"
+
+
 
 class HelloTriangleApplication
 {
 private:
     const int MAX_FRAMES_IN_FLIGHT = 3;
-    std::__1::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
+    std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
 
     VkInstance instance;
 
@@ -49,6 +52,9 @@ private:
     std::vector<VkFence> inFlightFences;
     uint32_t currentFrame = 0;
 
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
+
     // Vertex Buffer(VBO)
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
@@ -57,6 +63,18 @@ private:
     std::vector<VkBuffer> uniformBuffers;
     std::vector<VkDeviceMemory> uniformBuffersMemory;
     std::vector<void *> uniformBuffersMapped;
+
+    VkImage depthImage;
+    VkDeviceMemory depthImageMemory;
+    VkImageView depthImageView;
+
+    //MSAA
+    VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
+    VkSampleCountFlagBits getMaxUsableSampleCount();
+
+    VkImage colorImage;
+    VkDeviceMemory colorImageMemory;
+    VkImageView colorImageView;
 
     void initWindow();
 
@@ -105,9 +123,13 @@ private:
     void createFramebuffers();
     void createCommandPool();
 
+    void createColorResources();
+    void createDepthResources();
+
     u_Texture texture;
 
     void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory);
+    void loadModel();
     void createVertexBuffer();
     void createIndexBuffer();
     void createUniformBuffers();
@@ -137,6 +159,11 @@ private:
     const int WIDTH = 1080;
     const int HEIGHT = 720;
 
+    std::string PROCESS_NAME = "Vulkos";
+
+    const std::string MODEL_PATH = "models/viking_room.obj";
+    const std::string TEXTURE_PATH = "models/viking_room.png";
+
     const std::vector<const char *> validationLayers = {
         "VK_LAYER_KHRONOS_validation"};
 
@@ -152,6 +179,7 @@ private:
 
 public:
     HelloTriangleApplication();
+    HelloTriangleApplication(std::string processName);
     void run();
     ~HelloTriangleApplication();
 };

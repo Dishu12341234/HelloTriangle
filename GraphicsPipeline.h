@@ -4,22 +4,34 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/hash.hpp>
 #include <array>
+#include "PassInfo.hpp"
 
 #include <vector>
 #include <fstream>
+#include <functional>
 
 //UBO
 struct UniformBufferObject {
-    glm::mat4 model;
+    glm::mat4 model[3];
     glm::mat4 view;
     glm::mat4 proj;
 };
 
+//PCS
+struct PushConstantC1
+{       
+    glm::mat4 data;
+};
+
+
 struct Vertex {
-    glm::vec2 pos;
+    glm::vec3 pos;
     glm::vec3 color;
     glm::vec2 texCoord;
 
@@ -28,16 +40,42 @@ struct Vertex {
     static VkVertexInputBindingDescription getBindingDescription();
     //Struct 2/2
     static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
+
+    bool operator==(const Vertex& other) const {
+    return pos == other.pos && color == other.color && texCoord == other.texCoord;
+}
+
 };
 
-struct u_GraphicsPipelineCreateInfo
-{
-    VkDevice device;
-    int height, width;
-    VkExtent2D swapChainExtent;
-    VkRenderPass renderPass;
-    VkDescriptorSetLayout* descriptorSetLayout;
-};
+
+namespace std {
+    template<>
+    struct hash<Vertex> {
+        size_t operator()(Vertex const& vertex) const {
+            size_t seed = 0;
+
+            auto hashCombine = [&seed](auto const& v) {
+                seed ^= std::hash<float>()(v)
+                      + 0x9e3779b97f4a7c15
+                      + (seed << 6)
+                      + (seed >> 2);
+            };
+
+            hashCombine(vertex.pos.x);
+            hashCombine(vertex.pos.y);
+            hashCombine(vertex.pos.z);
+
+            hashCombine(vertex.color.r);
+            hashCombine(vertex.color.g);
+            hashCombine(vertex.color.b);
+
+            hashCombine(vertex.texCoord.x);
+            hashCombine(vertex.texCoord.y);
+
+            return seed;
+        }
+    };
+}
 
 class u_GraphicsPipeline
 {
@@ -47,6 +85,7 @@ private:
     VkExtent2D swapChainExtent;
     VkRenderPass renderPass;
     VkDescriptorSetLayout* descriptorSetLayout;
+    VkSampleCountFlagBits msaaSamples;
     
     public:
     VkPipelineLayout pipelineLayout;

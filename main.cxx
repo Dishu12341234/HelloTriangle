@@ -10,8 +10,9 @@ int main(int argc, char const *argv[])
     pid_t pid = getpid();
     std::cout << "process ID: " << pid << std::endl;
 
-    HelloTriangleApplication application;
-
+    std::string processName = argv[0];
+    std::cout << "Process Name: " << processName << std::endl;
+    HelloTriangleApplication application(processName);
     try
     {
         application.run();
