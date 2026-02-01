@@ -1,8 +1,27 @@
 #include "HelloTriangleApplication.hpp"
+#include "GameMeshObject.h"
 #include <cstdlib>
 #include <cstring>
 #include <memory>
 
+
+void HelloTriangleApplication::initGameObjects()
+{
+    VulkanContext context{};
+    context.device = device;
+    context.physicalDevice = physicalDevice;
+    context.graphicsQueue = graphicsQueue;
+    context.instance = instance;
+    context.presentQueue = presentQueue;
+    context.commandPool = commandPool;
+
+    gameObjectPool.init(context);
+
+    GameObject* box = gameObjectPool.createNewGameObject(MODEL_PATH);
+    gameObjectPool.appendGameObject(box);
+
+    gameObjectPool.uploadVBOsAndIBOs();
+}
 
 void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)
 {

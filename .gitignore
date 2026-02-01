@@ -43,3 +43,6 @@ Thumbs.db
 *.map
 *.ilk
 *.dSYM/
+perf.data
+perf.data
+perf.data.old

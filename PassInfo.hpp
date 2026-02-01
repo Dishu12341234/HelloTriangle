@@ -5,6 +5,14 @@
 #include <string>
 #include <GLFW/glfw3.h>
 
+struct VulkanContext {
+    VkInstance instance;
+    VkPhysicalDevice physicalDevice;
+    VkDevice device;
+    VkQueue graphicsQueue;
+    VkQueue presentQueue;
+    VkCommandPool commandPool;
+};
 
 struct u_GraphicsPipelineCreateInfo
 {

@@ -6,16 +6,21 @@
 #include <chrono>
 #include "Textures.hpp"
 #include "GraphicsPipeline.h"
-
-
+#include "GameMeshObject.h"
+#include "MeshUploader.h"
+#include "GameObjectPool.h"
 
 class HelloTriangleApplication
 {
 private:
-    const int MAX_FRAMES_IN_FLIGHT = 3;
+    const int MAX_FRAMES_IN_FLIGHT = 2;
     std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
 
     VkInstance instance;
+    MeshUploader meshUploader;
+
+    GameObjectPool gameObjectPool;
+    GameMeshObject gmo1;
 
     struct QueueFamilyIndices
     {
@@ -51,6 +56,8 @@ private:
     std::vector<VkSemaphore> renderFinishedSemaphores;
     std::vector<VkFence> inFlightFences;
     uint32_t currentFrame = 0;
+
+    GameMeshObject testGameObject;
 
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
@@ -120,6 +127,8 @@ private:
 
     u_GraphicsPipeline graphicsPipeline;
 
+    void initGameObjects();
+
     void createFramebuffers();
     void createCommandPool();
 
@@ -161,8 +170,9 @@ private:
 
     std::string PROCESS_NAME = "Vulkos";
 
-    const std::string MODEL_PATH = "models/viking_room.obj";
+    const std::string MODEL_PATH = "models/Cube.obj";
     const std::string TEXTURE_PATH = "models/viking_room.png";
+    
 
     const std::vector<const char *> validationLayers = {
         "VK_LAYER_KHRONOS_validation"};
