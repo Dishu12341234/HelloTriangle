@@ -10,10 +10,8 @@ void HelloTriangleApplication::mainLoop()
     }
 }
 
-
 void HelloTriangleApplication::drawFrame()
 {
-
     // 1️⃣ Wait for previous frame to finish
     vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
     vkResetFences(device, 1, &inFlightFences[currentFrame]);
@@ -24,10 +22,15 @@ void HelloTriangleApplication::drawFrame()
         device,
         swapChain,
         UINT64_MAX,
-        imageAvailableSemaphores[currentFrame],
+        imageAvailableSemaphores[currentFrame], // still per-frame
         VK_NULL_HANDLE,
         &imageIndex);
 
+    if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) {
+        throw std::runtime_error("failed to acquire swap chain image!");
+    }
+
+    // 3️⃣ Reset the command buffer for this frame
     vkResetCommandBuffer(commandBuffers[currentFrame], 0); // or VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT
 
     // 4️⃣ Record drawing commands into the command buffer
@@ -48,7 +51,8 @@ void HelloTriangleApplication::drawFrame()
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
 
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
+    // ✅ Use renderFinishedSemaphore per swapchain image
+    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[imageIndex]};
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -68,8 +72,10 @@ void HelloTriangleApplication::drawFrame()
 
     vkQueuePresentKHR(presentQueue, &presentInfo);
 
+    // 7️⃣ Advance frame
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
+
 
 void HelloTriangleApplication::cleanup()
 {
@@ -83,12 +89,17 @@ void HelloTriangleApplication::cleanup()
     vkDestroyBuffer(device, vertexBuffer, nullptr);
     vkFreeMemory(device, vertexBufferMemory, nullptr);
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
-        vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
-        vkDestroyFence(device, inFlightFences[i], nullptr);
-    }
+    // Destroy per-frame semaphores and fences
+for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
+    vkDestroyFence(device, inFlightFences[i], nullptr);
+}
+
+// Destroy per-swapchain-image render-finished semaphores
+for (size_t i = 0; i < renderFinishedSemaphores.size(); i++) {
+    vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+}
+
 
     vkDestroyCommandPool(device, commandPool, nullptr);
 
@@ -119,6 +130,8 @@ void HelloTriangleApplication::cleanup()
     vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 
     vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+
+    
 
     vkDestroyDevice(device, nullptr);
     vkDestroySurfaceKHR(instance, surface, nullptr);

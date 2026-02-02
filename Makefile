@@ -23,12 +23,10 @@ MAC_EXEC   := $(BUILD_DIR)/main_mac
 LINUX_EXEC := $(BUILD_DIR)/main_linux
 
 # =========================
-# Vulkan SDK (macOS)
+# Vulkan SDK
 # =========================
-VULKAN_SDK := /home/divyansh-undley/SDKs/vulkansdk-linux-x86_64-1.4.335.0/1.4.335.0/
-
-
-
+MAC_VULKAN_SDK   := /home/divyansh/SDKs/vksdk/1.4.335.0/
+LINUX_VULKAN_SDK := /home/divyansh/SDKs/vksdk/1.4.335.0/x86_64
 
 # =========================
 # Flags
@@ -38,23 +36,24 @@ COMMON_CXXFLAGS := -std=c++2b -Wall -g -O1 \
 	-I/usr/include
 
 MAC_CXXFLAGS := $(COMMON_CXXFLAGS) \
-	-I$(VULKAN_SDK)/macOS/include
+	-I$(MAC_VULKAN_SDK)/macOS/include
 
-LINUX_CXXFLAGS := $(COMMON_CXXFLAGS)
+LINUX_CXXFLAGS := $(COMMON_CXXFLAGS) \
+	-I$(LINUX_VULKAN_SDK)/include
 
 COMMON_LDFLAGS := -L/opt/homebrew/lib -L./lib -lglfw
 
 MAC_LDFLAGS := $(COMMON_LDFLAGS) \
-	-L$(VULKAN_SDK)/macOS/lib \
+	-L$(MAC_VULKAN_SDK)/macOS/lib \
 	-lvulkan -lMoltenVK \
 	-framework Cocoa \
 	-framework IOKit \
 	-framework CoreFoundation \
 	-framework QuartzCore \
 	-framework Metal \
-	-Wl,-rpath,$(VULKAN_SDK)/macOS/lib
+	-Wl,-rpath,$(MAC_VULKAN_SDK)/macOS/lib
 
-LINUX_LDFLAGS := $(COMMON_LDFLAGS) -lvulkan
+LINUX_LDFLAGS := $(COMMON_LDFLAGS) -L$(LINUX_VULKAN_SDK)/lib -lvulkan
 
 # =========================
 # Colors
@@ -92,10 +91,15 @@ $(LINUX_EXEC): $(OBJS)
 	@echo -e "$(GREEN)Linking $(BGMAGENTA)$@$(RESET)"
 	$(CXX) $(OBJS) $(LINUX_CXXFLAGS) $(LINUX_LDFLAGS) -o $@
 
+# Object compilation
 $(BUILD_DIR)/%.o: %.cxx
 	@mkdir -p $(BUILD_DIR)
 	@echo -e "$(YELLOW)Compiling $(BGMAGENTA)$<$(RESET)"
-	$(CXX) $(COMMON_CXXFLAGS) -c $< -o $@
+ifeq ($(UNAME_S),Darwin)
+	$(CXX) $(MAC_CXXFLAGS) -c $< -o $@
+else
+	$(CXX) $(LINUX_CXXFLAGS) -c $< -o $@
+endif
 
 # =========================
 # Clean
@@ -103,4 +107,4 @@ $(BUILD_DIR)/%.o: %.cxx
 clean:
 	@echo -e "$(RED)Cleaning build directory...$(RESET)"
 	rm -rf $(BUILD_DIR)
-	mkdir build
+	mkdir -p $(BUILD_DIR)
