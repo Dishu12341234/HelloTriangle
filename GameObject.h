@@ -28,6 +28,7 @@ public:
     GameObject(VulkanContext vkContext);
     void loadMesh(GameMeshObject *mesh);
     void loadGeometry(std::string);
+    void loadGeometry(std::vector<Vertex> vertices, std::vector<uint32_t> indices); 
     void uploadVBOsAndIBOs();
     void drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescriptorSet> &descriptorSets, u_GraphicsPipeline &graphicsPipeline, VkExtent2D &swapChainExtent, uint64_t &instanceCount, uint32_t &currentFrame);
     uint32_t getID();

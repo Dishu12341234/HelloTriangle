@@ -16,6 +16,12 @@ GameObject *GameObjectPool::createNewGameObject(std::string modelPath)
     return gameObject;
 }
 
+GameObject *GameObjectPool::createNewGameObject()
+{
+    GameObject* gameObject = new GameObject(vkContext);
+    return gameObject;
+}
+
 void GameObjectPool::appendGameObject(GameObject *gameObject)
 {
     this->gameObjects.push_back(gameObject);

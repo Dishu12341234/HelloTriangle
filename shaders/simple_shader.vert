@@ -1,7 +1,7 @@
 #version 450
 
 layout(binding = 0) uniform UniformBufferObject {
-    mat4 model[3];
+    mat4 model;
     mat4 view;
     mat4 proj;
 } ubo;
@@ -21,7 +21,7 @@ layout(push_constant) uniform PushConstants {
 
 void main() {
     //gl_Position = pc.data * ubo.view * ubo.model[gl_InstanceIndex] * vec4(inPosition, 1.0);
-    gl_Position = ubo.proj * ubo.view * ubo.model[gl_InstanceIndex] * vec4(inPosition, 1.0);
+    gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
     fragColor = inColor;
     fragTexCoord = inTexCoord;
 }

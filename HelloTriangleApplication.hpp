@@ -171,7 +171,7 @@ private:
     std::string PROCESS_NAME = "Vulkos";
 
     const std::string MODEL_PATH = "models/Cube.obj";
-    const std::string TEXTURE_PATH = "models/viking_room.png";
+    const std::string TEXTURE_PATH = "textures/atlas.png";
     
 
     const std::vector<const char *> validationLayers = {

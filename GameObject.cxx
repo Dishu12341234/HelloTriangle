@@ -19,6 +19,13 @@ void GameObject::loadGeometry(std::string modelPath)
     this->mesh = new GameMeshObject(modelPath);
 }
 
+void GameObject::loadGeometry(std::vector<Vertex> vertices, std::vector<uint32_t> indices)
+{
+    this->mesh = new GameMeshObject();
+    this->mesh->vertices = vertices;
+    this->mesh->indices = indices;
+}
+
 void GameObject::uploadVBOsAndIBOs()
 {
     if(!mesh)
