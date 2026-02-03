@@ -14,6 +14,12 @@ struct d_Rect3D // dimessions_rect
     int w, h, b;
 };
 
+
+struct Transform
+{
+    glm::vec3 position;
+};
+
 class GameObject
 {
 private:
@@ -24,7 +30,10 @@ private:
     VulkanContext vkContext;
     static MeshUploader meshUploader;
 
-public:
+    friend class StandardBoxModel;
+    
+    public:
+    Transform transform;
     GameObject(VulkanContext vkContext);
     void loadMesh(GameMeshObject *mesh);
     void loadGeometry(std::string);
@@ -32,8 +41,8 @@ public:
     void uploadVBOsAndIBOs();
     void drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescriptorSet> &descriptorSets, u_GraphicsPipeline &graphicsPipeline, VkExtent2D &swapChainExtent, uint64_t &instanceCount, uint32_t &currentFrame);
     uint32_t getID();
-    void cleanUpResources();
-    ~GameObject();
+    virtual void cleanUpResources();
+    virtual ~GameObject() = default;
 };
 
 #endif

@@ -1,5 +1,6 @@
 #include "models/StandarBoxModel.h"
 
+
 inline glm::vec2 tileUV(uint32_t tileIndex, bool max)
 {
     uint32_t x = tileIndex % TILES_PER_ROW;
@@ -11,7 +12,7 @@ inline glm::vec2 tileUV(uint32_t tileIndex, bool max)
     return {u, v};
 }
 
-StandarBoxModel::StandarBoxModel(std::array<float, 6> faceUVTextureOffsets, VulkanContext vkContext)
+StandardBoxModel::StandardBoxModel(std::array<float, 6> faceUVTextureOffsets, VulkanContext vkContext) : GameObject{vkContext}
 {
     this->vkContext = vkContext;
 
@@ -65,15 +66,15 @@ StandarBoxModel::StandarBoxModel(std::array<float, 6> faceUVTextureOffsets, Vulk
         16,17,18, 18,19,16,
         20,21,22, 22,23,20
     };
-    gameObject = new GameObject(vkContext);
-    gameObject->loadGeometry(vertices, indices);
+
+    loadGeometry(vertices, indices);
 }
 
-GameObject *StandarBoxModel::getGameObject()
+void StandardBoxModel::cleanUpResources()
 {
-    return gameObject;
+    GameObject::cleanUpResources();
 }
 
-StandarBoxModel::~StandarBoxModel()
+StandardBoxModel::~StandardBoxModel()
 {
 }

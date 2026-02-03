@@ -20,10 +20,9 @@ enum Face {
 };
 
 
-class StandarBoxModel
+class StandardBoxModel : public GameObject
 {
 private:
-    GameObject *gameObject;
     float X_POSITIVE_UVIndexOffset{0};
     float X_NEGATIVE_UVIndexOffset{0};
     float Y_POSITIVE_UVIndexOffset{0};
@@ -33,9 +32,9 @@ private:
     VulkanContext vkContext;
 
 public:
-    StandarBoxModel(std::array<float, 6> faceUVTextureOffsets, VulkanContext vkContext);
-    GameObject* getGameObject();
-    ~StandarBoxModel();
+    StandardBoxModel(std::array<float, 6> faceUVTextureOffsets, VulkanContext vkContext);
+    void cleanUpResources() override;
+    ~StandardBoxModel();
 };
 
 #endif

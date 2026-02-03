@@ -16,12 +16,12 @@ layout(location = 1) out vec2 fragTexCoord;
 //inside the c++ code for sake of learning I have use a push constant for ubo.proj as pc.data
 
 layout(push_constant) uniform PushConstants {
-    mat4 data;
+    mat4 model;
 } pc;
 
 void main() {
     //gl_Position = pc.data * ubo.view * ubo.model[gl_InstanceIndex] * vec4(inPosition, 1.0);
-    gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
+    gl_Position = ubo.proj * ubo.view * pc.model * vec4(inPosition, 1.0);
     fragColor = inColor;
     fragTexCoord = inTexCoord;
 }

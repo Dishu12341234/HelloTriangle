@@ -48,7 +48,7 @@ void GameObjectPool::cleanUpResources()
     for (auto &&gameObject : gameObjects)
     {
         gameObject->cleanUpResources();
-        delete gameObject;
+        delete gameObject;  
     }
 
     gameObjects.clear();

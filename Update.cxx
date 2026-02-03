@@ -92,11 +92,10 @@ void HelloTriangleApplication::initGameObjects()
 
     gameObjectPool.init(context);
 
-    StandarBoxModel grass({0, 1, 1, 1, 1, 1}, context);
+    StandardBoxModel *grass = new StandardBoxModel({0, 1, 1, 1, 1, 1}, context);
+    grass->transform.position = glm::vec3(1.f,1.f,0.f);
 
-    // GameObject *box = gameObjectPool.createNewGameObject();
-    // box->loadGeometry(vertices, indices);
-    gameObjectPool.appendGameObject(grass.getGameObject());
+    gameObjectPool.appendGameObject(grass);
 
     gameObjectPool.uploadVBOsAndIBOs();
 }
@@ -112,7 +111,6 @@ void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)
 
     // Model 0
     // ubo.model = glm::rotate(glm::mat4(1.f), time * glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
-    ubo.model = glm::translate(glm::mat4(1.f), glm::vec3(1.f, 1.f, 0.5f));
     // ubo.model = glm::rotate(ubo.model, 3 * time * glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
 
     ubo.view = glm::lookAt(glm::vec3(2.f, 2.f, 1.f), glm::vec3(0.f), glm::vec3(0.f, -0.f, 1.f));

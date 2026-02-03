@@ -26,7 +26,7 @@ struct UniformBufferObject {
 //PCS
 struct PushConstantC1
 {       
-    glm::mat4 data;
+    glm::mat4 model;
 };
 
 

@@ -47,8 +47,7 @@ void GameObject::drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescr
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.pipelineLayout, 0, 1, &(descriptorSets[currentFrame]), 0, nullptr);
 
     PushConstantC1 c1;
-    c1.data = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
-    c1.data[1][1] *= -1;
+    c1.model = glm::translate(glm::mat4(1.f), glm::vec3(transform.position));
 
     vkCmdPushConstants(commandBuffer, graphicsPipeline.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstantC1), &c1);
 
@@ -63,10 +62,6 @@ uint32_t GameObject::getID()
 void GameObject::cleanUpResources()
 {
     this->mesh->cleanUpResources();
-}
-
-GameObject::~GameObject()
-{
     delete mesh;
     mesh = nullptr;
 }
