@@ -49,6 +49,11 @@ VkSampleCountFlagBits HelloTriangleApplication::getMaxUsableSampleCount()
     return VK_SAMPLE_COUNT_1_BIT;
 }
 
+void HelloTriangleApplication::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    std::cout << "Cursor position: X=" << xpos << ", Y=" << ypos << std::endl;
+}
+
 void HelloTriangleApplication::initWindow()
 {
     glfwInit();
@@ -57,6 +62,7 @@ void HelloTriangleApplication::initWindow()
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     _window = glfwCreateWindow(WIDTH, HEIGHT, PROCESS_NAME.c_str(), nullptr, nullptr);
+    glfwSetCursorPosCallback(_window, HelloTriangleApplication::cursor_position_callback);
 }
 
 void HelloTriangleApplication::initVulkan()
@@ -104,7 +110,9 @@ void HelloTriangleApplication::initVulkan()
     testGameObject.loadMeshModel(MODEL_PATH);
     // createVertexBuffer();
     // createIndexBuffer();
+    
     initGameObjects();
+    
     createUniformBuffers();
     createDescriptorPool();
 

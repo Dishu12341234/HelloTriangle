@@ -8,17 +8,17 @@
 #define TILES_PER_ROW 20
 #define TILE_SIZE 16.0f
 #define U 0.05f
+#define GRASS_UVS {0, 1, 1, 1, 1, 1}
 
-
-enum Face {
+enum Face
+{
     FRONT = 0,
-    BACK  = 1,
-    LEFT  = 2,
+    BACK = 1,
+    LEFT = 2,
     RIGHT = 3,
-    TOP   = 4,
-    BOTTOM= 5
+    TOP = 4,
+    BOTTOM = 5
 };
-
 
 class StandardBoxModel : public GameObject
 {

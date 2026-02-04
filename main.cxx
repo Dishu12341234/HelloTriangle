@@ -3,6 +3,11 @@
 #include <iostream>
 #include <cstdlib>
 
+void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    std::cout << "Cursor position: X=" << xpos << ", Y=" << ypos << std::endl;
+}
+
 //for PID
 #include <unistd.h>
 int main(int argc, char const *argv[])

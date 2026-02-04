@@ -16,6 +16,8 @@ private:
     const int MAX_FRAMES_IN_FLIGHT = 2;
     std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
 
+    static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
+
     VkInstance instance;
     MeshUploader meshUploader;
 

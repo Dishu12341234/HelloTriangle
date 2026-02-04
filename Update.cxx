@@ -2,6 +2,7 @@
 #include "GameMeshObject.h"
 #include "models/StandarBoxModel.h"
 #include <cstdlib>
+#include "Terrain.h"
 #include <cstring>
 #include <memory>
 
@@ -91,13 +92,17 @@ void HelloTriangleApplication::initGameObjects()
     //
 
     gameObjectPool.init(context);
-
-    StandardBoxModel *grass = new StandardBoxModel({0, 1, 1, 1, 1, 1}, context);
-    grass->transform.position = glm::vec3(1.f,1.f,0.f);
-
-    gameObjectPool.appendGameObject(grass);
-
+    Terrain terrain(context, gameObjectPool);
+    std::cout << "Before" << std::endl;
+    terrain.generateGrassLayer();
+    
+    // StandardBoxModel *grass = new StandardBoxModel({0, 1, 1, 1, 1, 1}, context);
+    // grass->transform.position = glm::vec3(1.f,1.f,0.f);
+    
+    // gameObjectPool.appendGameObject(grass);
+    
     gameObjectPool.uploadVBOsAndIBOs();
+    std::cout << "After" << std::endl;
 }
 
 void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)
