@@ -28,15 +28,22 @@ void GameObject::loadGeometry(std::vector<Vertex> vertices, std::vector<uint32_t
 
 void GameObject::uploadVBOsAndIBOs()
 {
-    if(!mesh)
+    if (!mesh)
         return;
-    
-    meshUploader.upload(vkContext, *(this->mesh));
+
+    VkCommandBuffer uploadCmd =
+        meshUploader.beginBatch(
+            vkContext.device,
+            vkContext.commandPool);
+
+    meshUploader.recordUpload(vkContext, *this->mesh, uploadCmd, uploadGarbage);
+
+    meshUploader.endBatch(vkContext, uploadCmd, uploadGarbage);
 }
 
 void GameObject::drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescriptorSet> &descriptorSets, u_GraphicsPipeline &graphicsPipeline, VkExtent2D &swapChainExtent, uint64_t &instanceCount, uint32_t &currentFrame)
 {
-    if(!mesh)
+    if (!mesh)
         return;
 
     VkBuffer vertexBuffers[] = {mesh->vertexBuffer};

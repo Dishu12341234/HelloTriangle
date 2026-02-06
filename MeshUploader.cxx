@@ -1,6 +1,13 @@
 #include "MeshUploader.h"
 #include "Textures.hpp"
+
 #include <cstring>
+#include <stdexcept>
+#include <vector>
+
+/* ============================================================
+   Helpers
+   ============================================================ */
 
 uint32_t findMemoryType(
     VkPhysicalDevice physicalDevice,
@@ -8,7 +15,9 @@ uint32_t findMemoryType(
     VkMemoryPropertyFlags properties)
 {
     VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+    vkGetPhysicalDeviceMemoryProperties(
+        physicalDevice,
+        &memProperties);
 
     for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
     {
@@ -62,23 +71,15 @@ void endSingleTimeCommands(
     vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
 
-VkCommandBuffer MeshUploader::beginBatch(VkDevice device, VkCommandPool commandPool)
+/* ============================================================
+   MeshUploader
+   ============================================================ */
+
+VkCommandBuffer MeshUploader::beginBatch(
+    VkDevice device,
+    VkCommandPool commandPool)
 {
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = commandPool;
-    allocInfo.commandBufferCount = 1;
-
-    VkCommandBuffer cmd;
-    vkAllocateCommandBuffers(device, &allocInfo, &cmd);
-
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vkBeginCommandBuffer(cmd, &beginInfo);
-    return cmd;
+    return beginSingleTimeCommands(device, commandPool);
 }
 
 void MeshUploader::recordUpload(
@@ -87,99 +88,15 @@ void MeshUploader::recordUpload(
     VkCommandBuffer cmd,
     std::vector<PendingUpload> &garbage)
 {
-
-    if (mesh.vertices.empty())
-    {
-        std::cerr << "Skipping empty mesh\n";
-        return;
-    }
-    VkDeviceSize vertexSize =
-        sizeof(mesh.vertices[0]) * mesh.vertices.size();
-    VkDeviceSize indexSize =
-        sizeof(mesh.indices[0]) * mesh.indices.size();
-
-    // ===== VERTEX STAGING =====
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingMemory;
-
-    u_Texture::createBuffer(
-        vkContext,
-        vertexSize,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        stagingBuffer,
-        stagingMemory);
-
-    void *data;
-    vkMapMemory(vkContext.device, stagingMemory, 0, vertexSize, 0, &data);
-    memcpy(data, mesh.vertices.data(), vertexSize);
-    vkUnmapMemory(vkContext.device, stagingMemory);
-
-    u_Texture::createBuffer(
-        vkContext,
-        vertexSize,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        mesh.vertexBuffer,
-        mesh.vertexBufferMemory);
-
-    VkBufferCopy copy{};
-    copy.size = vertexSize;
-    vkCmdCopyBuffer(cmd, stagingBuffer, mesh.vertexBuffer, 1, &copy);
-
-    garbage.push_back({stagingBuffer, stagingMemory});
-
-    // ===== INDEX BUFFER =====
-    if (!mesh.indices.empty())
-    {
-        VkBuffer indexStaging;
-        VkDeviceMemory indexMemory;
-
-        u_Texture::createBuffer(
-            vkContext,
-            indexSize,
-            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-            indexStaging,
-            indexMemory);
-
-        vkMapMemory(vkContext.device, indexMemory, 0, indexSize, 0, &data);
-        memcpy(data, mesh.indices.data(), indexSize);
-        vkUnmapMemory(vkContext.device, indexMemory);
-
-        u_Texture::createBuffer(
-            vkContext,
-            indexSize,
-            VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-            mesh.indexBuffer,
-            mesh.indexBufferMemory);
-
-        VkBufferCopy indexCopy{};
-        indexCopy.size = indexSize;
-        vkCmdCopyBuffer(cmd, indexStaging, mesh.indexBuffer, 1, &indexCopy);
-
-        garbage.push_back({indexStaging, indexMemory});
-    }
-}
-
-void MeshUploader::upload(
-    VulkanContext &vkContext,
-    GameMeshObject &mesh)
-{
-
     mesh.vkContext = vkContext;
 
-    VkDeviceSize vertexSize = sizeof(mesh.vertices[0]) * mesh.vertices.size();
-    VkDeviceSize indexSize = sizeof(mesh.indices[0]) * mesh.indices.size();
+    /* ===================== VERTEX BUFFER ===================== */
 
-    // === 1. Create staging buffer ===
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingMemory;
+    VkDeviceSize vertexSize =
+        sizeof(mesh.vertices[0]) * mesh.vertices.size();
+
+    VkBuffer vertexStaging;
+    VkDeviceMemory vertexStagingMemory;
 
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -187,10 +104,17 @@ void MeshUploader::upload(
     bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    vkCreateBuffer(vkContext.device, &bufferInfo, nullptr, &stagingBuffer);
+    vkCreateBuffer(
+        vkContext.device,
+        &bufferInfo,
+        nullptr,
+        &vertexStaging);
 
     VkMemoryRequirements memReq;
-    vkGetBufferMemoryRequirements(vkContext.device, stagingBuffer, &memReq);
+    vkGetBufferMemoryRequirements(
+        vkContext.device,
+        vertexStaging,
+        &memReq);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -199,24 +123,46 @@ void MeshUploader::upload(
         vkContext.physicalDevice,
         memReq.memoryTypeBits,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    vkAllocateMemory(vkContext.device, &allocInfo, nullptr, &stagingMemory);
-    vkBindBufferMemory(vkContext.device, stagingBuffer, stagingMemory, 0);
+    vkAllocateMemory(
+        vkContext.device,
+        &allocInfo,
+        nullptr,
+        &vertexStagingMemory);
 
-    // Copy vertex data
+    vkBindBufferMemory(
+        vkContext.device,
+        vertexStaging,
+        vertexStagingMemory,
+        0);
+
     void *data;
-    vkMapMemory(vkContext.device, stagingMemory, 0, vertexSize, 0, &data);
-    memcpy(data, mesh.vertices.data(), (size_t)vertexSize);
-    vkUnmapMemory(vkContext.device, stagingMemory);
+    vkMapMemory(
+        vkContext.device,
+        vertexStagingMemory,
+        0,
+        vertexSize,
+        0,
+        &data);
 
-    // === 2. Create device-local vertex buffer ===
+    memcpy(data, mesh.vertices.data(), (size_t)vertexSize);
+    vkUnmapMemory(vkContext.device, vertexStagingMemory);
+
     bufferInfo.usage =
         VK_BUFFER_USAGE_TRANSFER_DST_BIT |
         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 
-    vkCreateBuffer(vkContext.device, &bufferInfo, nullptr, &mesh.vertexBuffer);
-    vkGetBufferMemoryRequirements(vkContext.device, mesh.vertexBuffer, &memReq);
+    vkCreateBuffer(
+        vkContext.device,
+        &bufferInfo,
+        nullptr,
+        &mesh.vertexBuffer);
+
+    vkGetBufferMemoryRequirements(
+        vkContext.device,
+        mesh.vertexBuffer,
+        &memReq);
 
     allocInfo.allocationSize = memReq.size;
     allocInfo.memoryTypeIndex = findMemoryType(
@@ -224,92 +170,128 @@ void MeshUploader::upload(
         memReq.memoryTypeBits,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    vkAllocateMemory(vkContext.device, &allocInfo, nullptr, &mesh.vertexBufferMemory);
-    vkBindBufferMemory(vkContext.device, mesh.vertexBuffer, mesh.vertexBufferMemory, 0);
+    vkAllocateMemory(
+        vkContext.device,
+        &allocInfo,
+        nullptr,
+        &mesh.vertexBufferMemory);
 
-    // === 3. Copy staging → vertex buffer ===
-    VkCommandBuffer cmd = beginSingleTimeCommands(vkContext.device, vkContext.commandPool);
+    vkBindBufferMemory(
+        vkContext.device,
+        mesh.vertexBuffer,
+        mesh.vertexBufferMemory,
+        0);
 
-    VkBufferCopy copyRegion{};
-    copyRegion.size = vertexSize;
-    vkCmdCopyBuffer(cmd, stagingBuffer, mesh.vertexBuffer, 1, &copyRegion);
+    VkBufferCopy vertexCopy{};
+    vertexCopy.size = vertexSize;
 
-    endSingleTimeCommands(vkContext.device, vkContext.graphicsQueue, vkContext.commandPool, cmd);
+    vkCmdCopyBuffer(
+        cmd,
+        vertexStaging,
+        mesh.vertexBuffer,
+        1,
+        &vertexCopy);
 
-    // === 4. Cleanup staging ===
-    vkDestroyBuffer(vkContext.device, stagingBuffer, nullptr);
-    vkFreeMemory(vkContext.device, stagingMemory, nullptr);
+    garbage.push_back({vertexStaging, vertexStagingMemory});
 
-    // ================= INDEX BUFFER =================
+    /* ===================== INDEX BUFFER ===================== */
 
     if (!mesh.indices.empty())
     {
-        VkBuffer indexStagingBuffer;
+        VkDeviceSize indexSize =
+            sizeof(mesh.indices[0]) * mesh.indices.size();
+
+        VkBuffer indexStaging;
         VkDeviceMemory indexStagingMemory;
 
-        VkBufferCreateInfo indexBufferInfo{};
-        indexBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        indexBufferInfo.size = indexSize;
-        indexBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-        indexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        bufferInfo.size = indexSize;
+        bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
-        vkCreateBuffer(vkContext.device, &indexBufferInfo, nullptr, &indexStagingBuffer);
+        vkCreateBuffer(
+            vkContext.device,
+            &bufferInfo,
+            nullptr,
+            &indexStaging);
 
-        VkMemoryRequirements indexMemReq;
-        vkGetBufferMemoryRequirements(vkContext.device, indexStagingBuffer, &indexMemReq);
+        vkGetBufferMemoryRequirements(
+            vkContext.device,
+            indexStaging,
+            &memReq);
 
-        VkMemoryAllocateInfo indexAllocInfo{};
-        indexAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        indexAllocInfo.allocationSize = indexMemReq.size;
-        indexAllocInfo.memoryTypeIndex = findMemoryType(
+        allocInfo.allocationSize = memReq.size;
+        allocInfo.memoryTypeIndex = findMemoryType(
             vkContext.physicalDevice,
-            indexMemReq.memoryTypeBits,
+            memReq.memoryTypeBits,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-        vkAllocateMemory(vkContext.device, &indexAllocInfo, nullptr, &indexStagingMemory);
-        vkBindBufferMemory(vkContext.device, indexStagingBuffer, indexStagingMemory, 0);
+        vkAllocateMemory(
+            vkContext.device,
+            &allocInfo,
+            nullptr,
+            &indexStagingMemory);
 
-        // copy index data
-        void *indexData;
-        vkMapMemory(vkContext.device, indexStagingMemory, 0, indexSize, 0, &indexData);
-        memcpy(indexData, mesh.indices.data(), (size_t)indexSize);
+        vkBindBufferMemory(
+            vkContext.device,
+            indexStaging,
+            indexStagingMemory,
+            0);
+
+        vkMapMemory(
+            vkContext.device,
+            indexStagingMemory,
+            0,
+            indexSize,
+            0,
+            &data);
+
+        memcpy(data, mesh.indices.data(), (size_t)indexSize);
         vkUnmapMemory(vkContext.device, indexStagingMemory);
 
-        // device-local index buffer
-        indexBufferInfo.usage =
+        bufferInfo.usage =
             VK_BUFFER_USAGE_TRANSFER_DST_BIT |
             VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 
-        vkCreateBuffer(vkContext.device, &indexBufferInfo, nullptr, &mesh.indexBuffer);
-        vkGetBufferMemoryRequirements(vkContext.device, mesh.indexBuffer, &indexMemReq);
+        vkCreateBuffer(
+            vkContext.device,
+            &bufferInfo,
+            nullptr,
+            &mesh.indexBuffer);
 
-        indexAllocInfo.allocationSize = indexMemReq.size;
-        indexAllocInfo.memoryTypeIndex = findMemoryType(
+        vkGetBufferMemoryRequirements(
+            vkContext.device,
+            mesh.indexBuffer,
+            &memReq);
+
+        allocInfo.allocationSize = memReq.size;
+        allocInfo.memoryTypeIndex = findMemoryType(
             vkContext.physicalDevice,
-            indexMemReq.memoryTypeBits,
+            memReq.memoryTypeBits,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-        vkAllocateMemory(vkContext.device, &indexAllocInfo, nullptr, &mesh.indexBufferMemory);
-        vkBindBufferMemory(vkContext.device, mesh.indexBuffer, mesh.indexBufferMemory, 0);
+        vkAllocateMemory(
+            vkContext.device,
+            &allocInfo,
+            nullptr,
+            &mesh.indexBufferMemory);
 
-        // copy staging → device
-        VkCommandBuffer indexCmd =
-            beginSingleTimeCommands(vkContext.device, vkContext.commandPool);
+        vkBindBufferMemory(
+            vkContext.device,
+            mesh.indexBuffer,
+            mesh.indexBufferMemory,
+            0);
 
         VkBufferCopy indexCopy{};
         indexCopy.size = indexSize;
-        vkCmdCopyBuffer(indexCmd, indexStagingBuffer, mesh.indexBuffer, 1, &indexCopy);
 
-        endSingleTimeCommands(
-            vkContext.device,
-            vkContext.graphicsQueue,
-            vkContext.commandPool,
-            indexCmd);
+        vkCmdCopyBuffer(
+            cmd,
+            indexStaging,
+            mesh.indexBuffer,
+            1,
+            &indexCopy);
 
-        // cleanup
-        vkDestroyBuffer(vkContext.device, indexStagingBuffer, nullptr);
-        vkFreeMemory(vkContext.device, indexStagingMemory, nullptr);
+        garbage.push_back({indexStaging, indexStagingMemory});
     }
 }
 
@@ -318,26 +300,15 @@ void MeshUploader::endBatch(
     VkCommandBuffer cmd,
     const std::vector<PendingUpload> &garbage)
 {
-    vkEndCommandBuffer(cmd);
-
-    VkSubmitInfo submit{};
-    submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submit.commandBufferCount = 1;
-    submit.pCommandBuffers = &cmd;
-
-    vkQueueSubmit(vkContext.graphicsQueue, 1, &submit, VK_NULL_HANDLE);
-    vkQueueWaitIdle(vkContext.graphicsQueue);
-
-    vkFreeCommandBuffers(
+    endSingleTimeCommands(
         vkContext.device,
+        vkContext.graphicsQueue,
         vkContext.commandPool,
-        1,
-        &cmd);
+        cmd);
 
-    // cleanup staging AFTER GPU is done
-    for (auto &g : garbage)
+    for (const auto &g : garbage)
     {
-        vkDestroyBuffer(vkContext.device, g.stagingBuffer, nullptr);
-        vkFreeMemory(vkContext.device, g.stagingMemory, nullptr);
+        vkDestroyBuffer(vkContext.device, g.buffer, nullptr);
+        vkFreeMemory(vkContext.device, g.memory, nullptr);
     }
 }

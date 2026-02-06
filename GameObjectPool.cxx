@@ -7,6 +7,7 @@ GameObjectPool::GameObjectPool()
 void GameObjectPool::init(VulkanContext context)
 {
     this->vkContext = context;
+    uploadGarbage.reserve(256);
 }
 
 GameObject *GameObjectPool::createNewGameObject(std::string modelPath)
@@ -29,20 +30,19 @@ void GameObjectPool::appendGameObject(GameObject *gameObject)
 
 void GameObjectPool::uploadVBOsAndIBOs()
 {
-    MeshUploader uploader;
+    MeshUploader meshUploader;
 
-    // VkCommandBuffer cmd =
-    //     uploader.beginBatch(vkContext.device, vkContext.commandPool);
-
-    // std::vector<PendingUpload> garbage;
-
+    VkCommandBuffer uploadCmd =
+        meshUploader.beginBatch(
+            vkContext.device,
+            vkContext.commandPool);
 
     for (auto &&gameObject : gameObjects)
     {
-        uploader.upload(vkContext, *gameObject->mesh);
+        meshUploader.recordUpload(vkContext, *gameObject->mesh, uploadCmd, uploadGarbage);
     }
 
-    // uploader.endBatch(vkContext, cmd, garbage);
+    meshUploader.endBatch(vkContext, uploadCmd, uploadGarbage);
 }
 
 void GameObjectPool::drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescriptorSet> &descriptorSets, u_GraphicsPipeline &graphicsPipeline, VkExtent2D &swapChainExtent, uint64_t instanceCount, uint32_t &currentFrame)

@@ -29,6 +29,7 @@ private:
     d_Pos3D position;
     VulkanContext vkContext;
     static MeshUploader meshUploader;
+    std::vector<PendingUpload> uploadGarbage;
 
     friend class StandardBoxModel;
     friend class GameObjectPool;

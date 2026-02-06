@@ -10,6 +10,7 @@ class GameObjectPool
 private:
     std::vector<GameObject *> gameObjects;
     VulkanContext vkContext;
+    std::vector<PendingUpload> uploadGarbage;
 
 public:
     GameObjectPool();
