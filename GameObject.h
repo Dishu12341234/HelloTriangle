@@ -31,6 +31,7 @@ private:
     static MeshUploader meshUploader;
 
     friend class StandardBoxModel;
+    friend class GameObjectPool;
     
     public:
     Transform transform;

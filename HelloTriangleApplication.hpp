@@ -9,14 +9,20 @@
 #include "GameMeshObject.h"
 #include "MeshUploader.h"
 #include "GameObjectPool.h"
+#include "Event.h"
 
 class HelloTriangleApplication
 {
 private:
+
+    // =====GAME STATES=====
+    bool menu = false;
+    Event *event;
+    bool keyStateA = false;
+
+
     const int MAX_FRAMES_IN_FLIGHT = 2;
     std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
-
-    static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 
     VkInstance instance;
     MeshUploader meshUploader;

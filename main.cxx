@@ -3,10 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 
-void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    std::cout << "Cursor position: X=" << xpos << ", Y=" << ypos << std::endl;
-}
+//to use with touch pad turn "disable while typing" off
 
 //for PID
 #include <unistd.h>

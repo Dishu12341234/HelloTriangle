@@ -33,6 +33,7 @@ LINUX_VULKAN_SDK := /home/divyansh/SDKs/vksdk/1.4.335.0/x86_64
 # =========================
 COMMON_CXXFLAGS := -std=c++2b -Wall -g -O1 \
 	-fsanitize=address -fno-omit-frame-pointer \
+	-MMD -MP \
 	-I/usr/include
 
 MAC_CXXFLAGS := $(COMMON_CXXFLAGS) \
@@ -100,6 +101,8 @@ ifeq ($(UNAME_S),Darwin)
 else
 	$(CXX) $(LINUX_CXXFLAGS) -c $< -o $@
 endif
+
+-include $(BUILD_DIR)/*.d
 
 # =========================
 # Clean

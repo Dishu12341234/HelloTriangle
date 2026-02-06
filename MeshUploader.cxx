@@ -1,4 +1,5 @@
 #include "MeshUploader.h"
+#include "Textures.hpp"
 #include <cstring>
 
 uint32_t findMemoryType(
@@ -61,8 +62,113 @@ void endSingleTimeCommands(
     vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
 
+VkCommandBuffer MeshUploader::beginBatch(VkDevice device, VkCommandPool commandPool)
+{
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool = commandPool;
+    allocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer cmd;
+    vkAllocateCommandBuffers(device, &allocInfo, &cmd);
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(cmd, &beginInfo);
+    return cmd;
+}
+
+void MeshUploader::recordUpload(
+    const VulkanContext &vkContext,
+    GameMeshObject &mesh,
+    VkCommandBuffer cmd,
+    std::vector<PendingUpload> &garbage)
+{
+
+    if (mesh.vertices.empty())
+    {
+        std::cerr << "Skipping empty mesh\n";
+        return;
+    }
+    VkDeviceSize vertexSize =
+        sizeof(mesh.vertices[0]) * mesh.vertices.size();
+    VkDeviceSize indexSize =
+        sizeof(mesh.indices[0]) * mesh.indices.size();
+
+    // ===== VERTEX STAGING =====
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingMemory;
+
+    u_Texture::createBuffer(
+        vkContext,
+        vertexSize,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        stagingBuffer,
+        stagingMemory);
+
+    void *data;
+    vkMapMemory(vkContext.device, stagingMemory, 0, vertexSize, 0, &data);
+    memcpy(data, mesh.vertices.data(), vertexSize);
+    vkUnmapMemory(vkContext.device, stagingMemory);
+
+    u_Texture::createBuffer(
+        vkContext,
+        vertexSize,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        mesh.vertexBuffer,
+        mesh.vertexBufferMemory);
+
+    VkBufferCopy copy{};
+    copy.size = vertexSize;
+    vkCmdCopyBuffer(cmd, stagingBuffer, mesh.vertexBuffer, 1, &copy);
+
+    garbage.push_back({stagingBuffer, stagingMemory});
+
+    // ===== INDEX BUFFER =====
+    if (!mesh.indices.empty())
+    {
+        VkBuffer indexStaging;
+        VkDeviceMemory indexMemory;
+
+        u_Texture::createBuffer(
+            vkContext,
+            indexSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            indexStaging,
+            indexMemory);
+
+        vkMapMemory(vkContext.device, indexMemory, 0, indexSize, 0, &data);
+        memcpy(data, mesh.indices.data(), indexSize);
+        vkUnmapMemory(vkContext.device, indexMemory);
+
+        u_Texture::createBuffer(
+            vkContext,
+            indexSize,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            mesh.indexBuffer,
+            mesh.indexBufferMemory);
+
+        VkBufferCopy indexCopy{};
+        indexCopy.size = indexSize;
+        vkCmdCopyBuffer(cmd, indexStaging, mesh.indexBuffer, 1, &indexCopy);
+
+        garbage.push_back({indexStaging, indexMemory});
+    }
+}
+
 void MeshUploader::upload(
-    VulkanContext vkContext,
+    VulkanContext &vkContext,
     GameMeshObject &mesh)
 {
 
@@ -204,5 +310,34 @@ void MeshUploader::upload(
         // cleanup
         vkDestroyBuffer(vkContext.device, indexStagingBuffer, nullptr);
         vkFreeMemory(vkContext.device, indexStagingMemory, nullptr);
+    }
+}
+
+void MeshUploader::endBatch(
+    const VulkanContext &vkContext,
+    VkCommandBuffer cmd,
+    const std::vector<PendingUpload> &garbage)
+{
+    vkEndCommandBuffer(cmd);
+
+    VkSubmitInfo submit{};
+    submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit.commandBufferCount = 1;
+    submit.pCommandBuffers = &cmd;
+
+    vkQueueSubmit(vkContext.graphicsQueue, 1, &submit, VK_NULL_HANDLE);
+    vkQueueWaitIdle(vkContext.graphicsQueue);
+
+    vkFreeCommandBuffers(
+        vkContext.device,
+        vkContext.commandPool,
+        1,
+        &cmd);
+
+    // cleanup staging AFTER GPU is done
+    for (auto &g : garbage)
+    {
+        vkDestroyBuffer(vkContext.device, g.stagingBuffer, nullptr);
+        vkFreeMemory(vkContext.device, g.stagingMemory, nullptr);
     }
 }

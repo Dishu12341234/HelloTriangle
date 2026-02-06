@@ -9,6 +9,8 @@
 #define TILE_SIZE 16.0f
 #define U 0.05f
 #define GRASS_UVS {0, 1, 1, 1, 1, 1}
+#define WOOD_OAK_UVS {3, 3, 3, 3, 3, 3}
+#define LEAF_OAK_UVS {4, 4, 4, 4, 4, 4}
 
 enum Face
 {

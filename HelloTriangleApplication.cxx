@@ -5,7 +5,7 @@ void HelloTriangleApplication::mainLoop()
 {
     while (!glfwWindowShouldClose(_window))
     {
-        glfwPollEvents();
+        event->eventLoop();
         drawFrame();
     }
 }
@@ -82,6 +82,8 @@ void HelloTriangleApplication::cleanup()
     vkDeviceWaitIdle(device);
 
     gameObjectPool.cleanUpResources();
+
+    delete event;
 
     vkDestroyBuffer(device, indexBuffer, nullptr);
     vkFreeMemory(device, indexBufferMemory, nullptr);
