@@ -1,6 +1,5 @@
 #include "HelloTriangleApplication.hpp"
 
-
 void HelloTriangleApplication::mainLoop()
 {
     while (!glfwWindowShouldClose(_window))
@@ -26,7 +25,8 @@ void HelloTriangleApplication::drawFrame()
         VK_NULL_HANDLE,
         &imageIndex);
 
-    if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) {
+    if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR)
+    {
         throw std::runtime_error("failed to acquire swap chain image!");
     }
 
@@ -36,6 +36,7 @@ void HelloTriangleApplication::drawFrame()
     // 4️⃣ Record drawing commands into the command buffer
     recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
+    updateShaderStorageBuffer(currentFrame);
     updateUniformBuffer(currentFrame);
 
     // 5️⃣ Submit the command buffer to the graphics queue
@@ -76,7 +77,6 @@ void HelloTriangleApplication::drawFrame()
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-
 void HelloTriangleApplication::cleanup()
 {
     vkDeviceWaitIdle(device);
@@ -91,17 +91,24 @@ void HelloTriangleApplication::cleanup()
     vkDestroyBuffer(device, vertexBuffer, nullptr);
     vkFreeMemory(device, vertexBufferMemory, nullptr);
 
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        vkDestroyBuffer(device, ssboBuffers[i], nullptr);
+        vkFreeMemory(device, ssboBuffersMemory[i], nullptr);
+    }
+
     // Destroy per-frame semaphores and fences
-for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-    vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
-    vkDestroyFence(device, inFlightFences[i], nullptr);
-}
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
+        vkDestroyFence(device, inFlightFences[i], nullptr);
+    }
 
-// Destroy per-swapchain-image render-finished semaphores
-for (size_t i = 0; i < renderFinishedSemaphores.size(); i++) {
-    vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
-}
-
+    // Destroy per-swapchain-image render-finished semaphores
+    for (size_t i = 0; i < renderFinishedSemaphores.size(); i++)
+    {
+        vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+    }
 
     vkDestroyCommandPool(device, commandPool, nullptr);
 
@@ -132,8 +139,6 @@ for (size_t i = 0; i < renderFinishedSemaphores.size(); i++) {
     vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 
     vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
-
-    
 
     vkDestroyDevice(device, nullptr);
     vkDestroySurfaceKHR(instance, surface, nullptr);

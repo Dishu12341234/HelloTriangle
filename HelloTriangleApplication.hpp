@@ -14,12 +14,10 @@
 class HelloTriangleApplication
 {
 private:
-
     // =====GAME STATES=====
     bool menu = false;
     Event *event;
     bool keyStateA = false;
-
 
     const int MAX_FRAMES_IN_FLIGHT = 2;
     std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
@@ -83,7 +81,7 @@ private:
     VkDeviceMemory depthImageMemory;
     VkImageView depthImageView;
 
-    //MSAA
+    // MSAA
     VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
     VkSampleCountFlagBits getMaxUsableSampleCount();
 
@@ -150,6 +148,11 @@ private:
     void createVertexBuffer();
     void createIndexBuffer();
     void createUniformBuffers();
+    void createShaderStorageBuffers();
+
+    std::vector<VkBuffer> ssboBuffers;
+    std::vector<VkDeviceMemory> ssboBuffersMemory;
+
     void createDescriptorPool();
 
     VkDescriptorPool descriptorPool;
@@ -168,6 +171,7 @@ private:
     void mainLoop();
 
     void updateUniformBuffer(uint32_t currentImage);
+    void updateShaderStorageBuffer(uint32_t currentFrame);
 
     void drawFrame();
 
@@ -180,7 +184,6 @@ private:
 
     const std::string MODEL_PATH = "models/Cube.obj";
     const std::string TEXTURE_PATH = "textures/atlas.png";
-    
 
     const std::vector<const char *> validationLayers = {
         "VK_LAYER_KHRONOS_validation"};

@@ -75,6 +75,18 @@ void StandardBoxModel::cleanUpResources()
     GameObject::cleanUpResources();
 }
 
+glm::vec2 StandardBoxModel::tileIndexToUV(uint32_t tileIndex)
+{
+    float tileSize = TILE_SIZE / ATLAS_SIZE;
+
+    uint32_t tileX = tileIndex % TILES_PER_ROW;
+    uint32_t tileY = tileIndex / TILES_PER_ROW;
+
+    return glm::vec2(
+        tileX * tileSize,
+        tileY * tileSize
+    );
+}
 StandardBoxModel::~StandardBoxModel()
 {
 }

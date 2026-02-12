@@ -49,22 +49,18 @@ VkSampleCountFlagBits HelloTriangleApplication::getMaxUsableSampleCount()
     return VK_SAMPLE_COUNT_1_BIT;
 }
 
-
-
 void HelloTriangleApplication::initWindow()
 {
     glfwInit();
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-    
-    
+
     _window = glfwCreateWindow(WIDTH, HEIGHT, PROCESS_NAME.c_str(), nullptr, nullptr);
     event = new Event(*_window);
     glfwSetWindowUserPointer(_window, event);
-    
-    glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void HelloTriangleApplication::initVulkan()
@@ -112,10 +108,11 @@ void HelloTriangleApplication::initVulkan()
     testGameObject.loadMeshModel(MODEL_PATH);
     // createVertexBuffer();
     // createIndexBuffer();
-    
+
     initGameObjects();
-    
+
     createUniformBuffers();
+    createShaderStorageBuffers();
     createDescriptorPool();
 
     std::cout << "Creating Texture..." << std::endl;
@@ -829,7 +826,13 @@ void HelloTriangleApplication::createDescriptorSetLayout()
     samplerLayoutBinding.pImmutableSamplers = nullptr;
     samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    std::array<VkDescriptorSetLayoutBinding, 2> bindings = {uboLayoutBinding, samplerLayoutBinding};
+    VkDescriptorSetLayoutBinding ssboLayoutBinding{};
+    ssboLayoutBinding.binding = 2;
+    ssboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    ssboLayoutBinding.descriptorCount = 1;
+    ssboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    std::array<VkDescriptorSetLayoutBinding, 3> bindings = {uboLayoutBinding, samplerLayoutBinding, ssboLayoutBinding};
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
@@ -1050,23 +1053,56 @@ void HelloTriangleApplication::createUniformBuffers()
     }
 }
 
+void HelloTriangleApplication::createShaderStorageBuffers()
+{
+    VkDeviceSize bufferSize = sizeof(ObjectData) * MAX_OBJS;
+
+    ssboBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    ssboBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        createBuffer(
+            bufferSize,
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            ssboBuffers[i],
+            ssboBuffersMemory[i]);
+    }
+}
+
 void HelloTriangleApplication::createDescriptorPool()
 {
     std::cout << "Creating Descriptor Pool..." << std::endl;
 
-    std::array<VkDescriptorPoolSize, 2> poolSizes{};
+    std::array<VkDescriptorPoolSize, 3> poolSizes{};
+
+    // UBO
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[0].descriptorCount =
+        static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+    // Texture
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[1].descriptorCount =
+        static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+    // SSBO  ← ADD THIS
+    poolSizes[2].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    poolSizes[2].descriptorCount =
+        static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    poolInfo.poolSizeCount =
+        static_cast<uint32_t>(poolSizes.size());
     poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolInfo.maxSets =
+        static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
-    if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+    if (vkCreateDescriptorPool(device, &poolInfo, nullptr,
+                               &descriptorPool) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create descriptor pool!");
     }
@@ -1077,6 +1113,7 @@ void HelloTriangleApplication::createDescriptorSets()
     std::cout << "Creating Descriptor Sets..." << std::endl;
 
     std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = descriptorPool;
@@ -1084,6 +1121,7 @@ void HelloTriangleApplication::createDescriptorSets()
     allocInfo.pSetLayouts = layouts.data();
 
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+
     if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to allocate descriptor sets!");
@@ -1091,35 +1129,56 @@ void HelloTriangleApplication::createDescriptorSets()
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
+        // ---------- UBO ----------
         VkDescriptorBufferInfo bufferInfo{};
         bufferInfo.buffer = uniformBuffers[i];
         bufferInfo.offset = 0;
         bufferInfo.range = sizeof(UniformBufferObject);
 
+        // ---------- Texture ----------
         VkDescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         imageInfo.imageView = texture.textureImageView;
         imageInfo.sampler = texture.textureSampler;
 
-        std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+        // ---------- SSBO ----------
+        VkDescriptorBufferInfo ssboInfo{};
+        ssboInfo.buffer = ssboBuffers[i];
+        ssboInfo.offset = 0;
+        ssboInfo.range = sizeof(ObjectData) * MAX_OBJS;
 
+        std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+
+        // Binding 0 - UBO
         descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[0].dstSet = descriptorSets[i];
         descriptorWrites[0].dstBinding = 0;
-        descriptorWrites[0].dstArrayElement = 0;
         descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         descriptorWrites[0].descriptorCount = 1;
         descriptorWrites[0].pBufferInfo = &bufferInfo;
 
+        // Binding 1 - Texture
         descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[1].dstSet = descriptorSets[i];
         descriptorWrites[1].dstBinding = 1;
-        descriptorWrites[1].dstArrayElement = 0;
         descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         descriptorWrites[1].descriptorCount = 1;
         descriptorWrites[1].pImageInfo = &imageInfo;
 
-        vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        // Binding 2 - SSBO
+        descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[2].dstSet = descriptorSets[i];
+        descriptorWrites[2].dstBinding = 2;
+        descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        descriptorWrites[2].descriptorCount = 1;
+        descriptorWrites[2].pBufferInfo = &ssboInfo;
+
+        vkUpdateDescriptorSets(
+            device,
+            static_cast<uint32_t>(descriptorWrites.size()),
+            descriptorWrites.data(),
+            0,
+            nullptr);
     }
 }
 
@@ -1211,7 +1270,8 @@ void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer commandBuffer
     }
 }
 
-void HelloTriangleApplication::createSyncObject() {
+void HelloTriangleApplication::createSyncObject()
+{
     // 1️⃣ Per-frame semaphores for acquiring images
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -1229,16 +1289,20 @@ void HelloTriangleApplication::createSyncObject() {
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // start signaled
 
     // Create per-frame semaphores and fences
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
         if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+            vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
+        {
             throw std::runtime_error("failed to create semaphore or fence!");
         }
     }
 
     // Create per-swapchain-image render-finished semaphores
-    for (size_t i = 0; i < swapChainImages.size(); i++) {
-        if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS) {
+    for (size_t i = 0; i < swapChainImages.size(); i++)
+    {
+        if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS)
+        {
             throw std::runtime_error("failed to create renderFinished semaphore!");
         }
     }

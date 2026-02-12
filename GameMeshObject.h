@@ -27,6 +27,7 @@ private:
 
     friend class MeshUploader;
     friend class GameObject;
+    friend class GameObjectPool;
     friend class HelloTriangleApplication;
 public:
     GameMeshObject();

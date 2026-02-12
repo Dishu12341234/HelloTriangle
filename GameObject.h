@@ -25,16 +25,16 @@ class GameObject
 private:
     static std::atomic<uint32_t> globalGOIDCounter;
     uint32_t GOID = UINT32_MAX;
-    GameMeshObject *mesh = nullptr;
     d_Pos3D position;
     VulkanContext vkContext;
     static MeshUploader meshUploader;
     std::vector<PendingUpload> uploadGarbage;
-
     friend class StandardBoxModel;
     friend class GameObjectPool;
     
     public:
+    int tileIndex{0};
+    GameMeshObject *mesh = nullptr;
     Transform transform;
     GameObject(VulkanContext vkContext);
     void loadMesh(GameMeshObject *mesh);

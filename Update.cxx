@@ -152,3 +152,24 @@ void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)
     ubo.proj[1][1] *= -1; //-1 => y -> -y
     memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
+
+void HelloTriangleApplication::updateShaderStorageBuffer(uint32_t currentFrame)
+{
+    VkDeviceSize bufferSize = sizeof(ObjectData) * gameObjectPool.gameObjects.size();
+
+    ObjectData *data;
+    vkMapMemory(device,
+                ssboBuffersMemory[currentFrame],
+                0,
+                bufferSize,
+                0,
+                (void **)&data);
+
+    for (size_t i = 0; i < gameObjectPool.gameObjects.size(); i++)
+    {
+        data[i].model = glm::translate(glm::mat4(1.f), gameObjectPool.gameObjects.at(i)->transform.position);
+        data[i].uv =  StandardBoxModel::tileIndexToUV(gameObjectPool.gameObjects.at(i)->tileIndex);
+    }
+
+    vkUnmapMemory(device, ssboBuffersMemory[currentFrame]);
+}
