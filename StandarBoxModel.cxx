@@ -6,10 +6,10 @@ StandardBoxModel::StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsetsa, 
     std::vector<Vertex> vertices = {
 
         // +Z FRONT (side → tile 1)
-        {{-.05f, -.05f, .05f}, {.05f, .05f, .05f}, {0.f, 0.f}},
-        {{.05f, -.05f, .05f}, {.05f, .05f, .05f}, {1.f, 0.f}},
-        {{.05f, .05f, .05f}, {.05f, .05f, .05f}, {1.f, 1.f}},
-        {{-.05f, .05f, .05f}, {.05f, .05f, .05f}, {0.f, 1.f}},
+        {{-.05f, -.05f, .05f}, {.05f, .05f, .05f}, {0.f, 0.f}, faceUVTextureOffsetsa[TOP]},
+        {{.05f, -.05f, .05f}, {.05f, .05f, .05f}, {1.f, 0.f}, faceUVTextureOffsetsa[TOP]},
+        {{.05f, .05f, .05f}, {.05f, .05f, .05f}, {1.f, 1.f}, faceUVTextureOffsetsa[TOP]},
+        {{-.05f, .05f, .05f}, {.05f, .05f, .05f}, {0.f, 1.f}, faceUVTextureOffsetsa[TOP]},
 
         // -Z BACK (side → tile 1)
         {{.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {0.f, 0.f}, faceUVTextureOffsetsa[BACK]},

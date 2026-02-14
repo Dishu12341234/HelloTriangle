@@ -21,11 +21,12 @@ void HelloTriangleApplication::initGameObjects()
 
     gameObjectPool.init(context);
 
+    OakTree tree(gameObjectPool, context);
+    tree.generateTree({0, 0, 0});
+    
     Terrain terrain(context, gameObjectPool);
     terrain.generateGrassLayer();
 
-    OakTree tree(gameObjectPool, context);
-    tree.generateTree({0, 0, 0});
 
     // StandardBoxModel *grass = new StandardBoxModel({0, 1, 1, 1, 1, 1}, context);
     // grass->transform.position = glm::vec3(1.f,1.f,0.f);
