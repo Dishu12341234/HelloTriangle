@@ -17,6 +17,9 @@ private:
     std::array<bool, GLFW_KEY_LAST + 1> keyDown{};
 
 public:
+
+    double dt;
+
     double mouseX, mouseY;
     Event(GLFWwindow &window);
     static void keyPressedCallback(GLFWwindow *window, int key, int scancode, int action, int mods);

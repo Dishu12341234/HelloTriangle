@@ -22,10 +22,10 @@ void OakTree::generateTree(glm::vec3 pos)
     generateLeafLayer(pos, baseHeight, 5);
 
     // ---------------- LAYER 2 (3x3) ----------------
-    generateLeafLayer(pos, baseHeight + 0.2f, 3);
+    generateLeafLayer(pos, baseHeight + 0.1f, 3);
 
     // ---------------- LAYER 3 (2x2) ----------------
-    generateLeafLayer(pos, baseHeight + 0.3f, 2);
+    generateLeafLayer(pos, baseHeight + 0.2f, 1);
 }
 void OakTree::generateLeafLayer(glm::vec3 pos, float height, int size)
 {

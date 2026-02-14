@@ -84,6 +84,7 @@ void HelloTriangleApplication::cleanup()
     gameObjectPool.cleanUpResources();
 
     delete event;
+    delete camera;
 
     vkDestroyBuffer(device, indexBuffer, nullptr);
     vkFreeMemory(device, indexBufferMemory, nullptr);

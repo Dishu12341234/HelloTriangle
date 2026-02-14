@@ -37,9 +37,23 @@ void GameObjectPool::uploadVBOsAndIBOs()
             vkContext.device,
             vkContext.commandPool);
 
-    for (auto &&gameObject : gameObjects)
+    const size_t BATCH_SIZE = 16384;
+    size_t total = gameObjects.size();
+
+    for (size_t start = 0; start < total; start += BATCH_SIZE)
     {
-        meshUploader.recordUpload(vkContext, *gameObject->mesh, uploadCmd, uploadGarbage);
+        size_t end = std::min(start + BATCH_SIZE, total);
+
+        for (size_t i = start; i < end; ++i)
+        {
+            meshUploader.recordUpload(
+                vkContext,
+                *(gameObjects[i]->mesh),
+                uploadCmd,
+                uploadGarbage);
+        }
+
+        // optional: submit / flush here if needed per batch
     }
 
     meshUploader.endBatch(vkContext, uploadCmd, uploadGarbage);

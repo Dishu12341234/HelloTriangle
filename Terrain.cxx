@@ -8,8 +8,8 @@ Terrain::Terrain(VulkanContext vkContext, GameObjectPool &gop) : gameObjectPool{
 
 void Terrain::generateGrassLayer()
 {
-    int xn = 40;
-    int yn = 40;
+    int xn = 20;
+    int yn = 20;
     for (int x = 0; x < xn; x++)
     {
         for (int y = 0; y < yn; y++)

@@ -9,6 +9,7 @@
 #include "GameMeshObject.h"
 #include "MeshUploader.h"
 #include "GameObjectPool.h"
+#include "Camera.h"
 #include "Event.h"
 
 class HelloTriangleApplication
@@ -17,6 +18,7 @@ private:
     // =====GAME STATES=====
     bool menu = false;
     Event *event;
+    Camera *camera;
     bool keyStateA = false;
 
     const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -177,9 +179,6 @@ private:
 
     void cleanup();
 
-    const int WIDTH = 1080;
-    const int HEIGHT = 720;
-
     std::string PROCESS_NAME = "Vulkos";
 
     const std::string MODEL_PATH = "models/Cube.obj";
@@ -202,6 +201,8 @@ public:
     HelloTriangleApplication();
     HelloTriangleApplication(std::string processName);
     void run();
+    static const int WIDTH = 1080;
+    static const int HEIGHT = 720;
     ~HelloTriangleApplication();
 };
 

@@ -1,5 +1,6 @@
 #include "Event.h"
 #include <iostream>
+#include <chrono>
 
 Event::Event(GLFWwindow &window) : window{window}
 {
@@ -40,6 +41,14 @@ void Event::cursorPositionCallback(GLFWwindow *window, double xpos, double ypos)
 // TODO cursor callback this wont work
 void Event::eventLoop()
 {
+    static auto lastTime = std::chrono::high_resolution_clock::now();
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    auto delta = currentTime - lastTime;
+    lastTime = currentTime;
+
+    dt = std::chrono::duration<double, std::milli>(delta).count();
+    std::cout << "Δt = " << dt << std::endl;
+
     glfwPollEvents();
 }
 
