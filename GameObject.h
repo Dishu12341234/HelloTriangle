@@ -33,6 +33,7 @@ private:
     friend class GameObjectPool;
     
     public:
+    uint32_t faceUVTextureOffsets[6];
     int tileIndex{0};
     GameMeshObject *mesh = nullptr;
     Transform transform;

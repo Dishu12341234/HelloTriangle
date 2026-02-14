@@ -1,19 +1,17 @@
 #ifndef GAME_OBJECT_POOL
 #define GAME_OBJECT_POOL
 
-
 #define MAX_OBJS 65536
 
 #include <vector>
 #include <string.h>
 #include "GameObject.h"
 
-struct alignas(16) ObjectData {
+struct alignas(16) ObjectData
+{
     glm::mat4 model;
-    uint32_t tileIndex;
-    glm::vec2 padding;
+    uint32_t tileIndex[6];
 };
-
 
 class GameObjectPool
 {

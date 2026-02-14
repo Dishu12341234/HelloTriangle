@@ -26,7 +26,7 @@ class StandardBoxModel : public GameObject
 {
 private:
     VulkanContext vkContext;
-    std::array<float, 6> faceUVTextureOffsets;
+    
 
 public:
     StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsets, VulkanContext vkContext);

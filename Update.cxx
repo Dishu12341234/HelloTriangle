@@ -140,7 +140,6 @@ void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)
         cposz -= .05f;
     }
 
-    // std::cout << "(x,y)" << "(" << x << "," << y << ")" << std::endl;
     glm::vec3 cameraPos = glm::vec3(cposx, cposy, cposz);
 
     ubo.view = glm::lookAt(
@@ -169,7 +168,12 @@ void HelloTriangleApplication::updateShaderStorageBuffer(uint32_t currentFrame)
     for (size_t i = 0; i < gameObjectPool.gameObjects.size(); i++)
     {
         data[i].model = glm::translate(glm::mat4(1.f), gameObjectPool.gameObjects.at(i)->transform.position);
-        data[i].tileIndex = (gameObjectPool.gameObjects.at(i)->tileIndex);        
+        data[i].tileIndex[0] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[0]);        
+        data[i].tileIndex[1] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[1]);        
+        data[i].tileIndex[2] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[2]);        
+        data[i].tileIndex[3] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[3]);        
+        data[i].tileIndex[4] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[4]);        
+        data[i].tileIndex[5] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[5]);        
     }
 
     vkUnmapMemory(device, ssboBuffersMemory[currentFrame]);
