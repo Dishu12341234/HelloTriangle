@@ -6,40 +6,40 @@ StandardBoxModel::StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsetsa, 
     std::vector<Vertex> vertices = {
 
         // +Z FRONT (side → tile 1)
-        {{-.05f, -.05f, .05f}, {.05f, .05f, .05f}, {0.f, 0.f}, faceUVTextureOffsetsa[TOP]},
-        {{.05f, -.05f, .05f}, {.05f, .05f, .05f}, {1.f, 0.f}, faceUVTextureOffsetsa[TOP]},
-        {{.05f, .05f, .05f}, {.05f, .05f, .05f}, {1.f, 1.f}, faceUVTextureOffsetsa[TOP]},
-        {{-.05f, .05f, .05f}, {.05f, .05f, .05f}, {0.f, 1.f}, faceUVTextureOffsetsa[TOP]},
+        {{-.05f, -.05f, .05f}, {.05f, .05f, .05f}, {0.f, 0.f}},
+        {{.05f, -.05f, .05f}, {.05f, .05f, .05f}, {1.f, 0.f}},
+        {{.05f, .05f, .05f}, {.05f, .05f, .05f}, {1.f, 1.f}},
+        {{-.05f, .05f, .05f}, {.05f, .05f, .05f}, {0.f, 1.f}},
 
         // -Z BACK (side → tile 1)
-        {{.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {0.f, 0.f}, faceUVTextureOffsetsa[BACK]},
-        {{-.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {1.f, 0.f}, faceUVTextureOffsetsa[BACK]},
-        {{-.05f, .05f, -.05f}, {.05f, .05f, .05f}, {1.f, 1.f}, faceUVTextureOffsetsa[BACK]},
-        {{.05f, .05f, -.05f}, {.05f, .05f, .05f}, {0.f, 1.f}, faceUVTextureOffsetsa[BACK]},
+        {{.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {0.f, 0.f}},
+        {{-.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {1.f, 0.f}},
+        {{-.05f, .05f, -.05f}, {.05f, .05f, .05f}, {1.f, 1.f}},
+        {{.05f, .05f, -.05f}, {.05f, .05f, .05f}, {0.f, 1.f}},
 
         // -X LEFT (side → tile 1)
-        {{-.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {0.f, 0.f}, faceUVTextureOffsetsa[LEFT]},
-        {{-.05f, -.05f, .05f}, {.05f, .05f, .05f}, {1.f, 0.f}, faceUVTextureOffsetsa[LEFT]},
-        {{-.05f, .05f, .05f}, {.05f, .05f, .05f}, {1.f, 1.f}, faceUVTextureOffsetsa[LEFT]},
-        {{-.05f, .05f, -.05f}, {.05f, .05f, .05f}, {0.f, 1.f}, faceUVTextureOffsetsa[LEFT]},
+        {{-.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {0.f, 0.f}},
+        {{-.05f, -.05f, .05f}, {.05f, .05f, .05f}, {1.f, 0.f}},
+        {{-.05f, .05f, .05f}, {.05f, .05f, .05f}, {1.f, 1.f}},
+        {{-.05f, .05f, -.05f}, {.05f, .05f, .05f}, {0.f, 1.f}},
 
         // +X RIGHT (side → tile 1)
-        {{.05f, -.05f, .05f}, {.05f, .05f, .05f}, {0.f, 0.f}, faceUVTextureOffsetsa[RIGHT]},
-        {{.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {1.f, 0.f}, faceUVTextureOffsetsa[RIGHT]},
-        {{.05f, .05f, -.05f}, {.05f, .05f, .05f}, {1.f, 1.f}, faceUVTextureOffsetsa[RIGHT]},
-        {{.05f, .05f, .05f}, {.05f, .05f, .05f}, {0.f, 1.f}, faceUVTextureOffsetsa[RIGHT]},
+        {{.05f, -.05f, .05f}, {.05f, .05f, .05f}, {0.f, 0.f}},
+        {{.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {1.f, 0.f}},
+        {{.05f, .05f, -.05f}, {.05f, .05f, .05f}, {1.f, 1.f}},
+        {{.05f, .05f, .05f}, {.05f, .05f, .05f}, {0.f, 1.f}},
 
         // +Y FRONT (tile 0)
-        {{-.05f, .05f, .05f}, {.05f, .05f, .05f}, {0.f, 0.f}, faceUVTextureOffsetsa[FRONT]},
-        {{.05f, .05f, .05f}, {.05f, .05f, .05f}, {1.f, 0.f}, faceUVTextureOffsetsa[FRONT]},
-        {{.05f, .05f, -.05f}, {.05f, .05f, .05f}, {1.f, 1.f}, faceUVTextureOffsetsa[FRONT]},
-        {{-.05f, .05f, -.05f}, {.05f, .05f, .05f}, {0.f, 1.f}, faceUVTextureOffsetsa[FRONT]},
+        {{-.05f, .05f, .05f}, {.05f, .05f, .05f}, {0.f, 0.f}},
+        {{.05f, .05f, .05f}, {.05f, .05f, .05f}, {1.f, 0.f}},
+        {{.05f, .05f, -.05f}, {.05f, .05f, .05f}, {1.f, 1.f}},
+        {{-.05f, .05f, -.05f}, {.05f, .05f, .05f}, {0.f, 1.f}},
 
         // -Y BACK (tile 1)
-        {{-.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {0.f, 0.f}, faceUVTextureOffsetsa[BOTTOM]},
-        {{.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {1.f, 0.f}, faceUVTextureOffsetsa[BOTTOM]},
-        {{.05f, -.05f, .05f}, {.05f, .05f, .05f}, {1.f, 1.f}, faceUVTextureOffsetsa[BOTTOM]},
-        {{-.05f, -.05f, .05f}, {.05f, .05f, .05f}, {0.f, 1.f}, faceUVTextureOffsetsa[BOTTOM]},
+        {{-.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {0.f, 0.f}},
+        {{.05f, -.05f, -.05f}, {.05f, .05f, .05f}, {1.f, 0.f}},
+        {{.05f, -.05f, .05f}, {.05f, .05f, .05f}, {1.f, 1.f}},
+        {{-.05f, -.05f, .05f}, {.05f, .05f, .05f}, {0.f, 1.f}},
     };
 
     std::vector<uint32_t> indices = {

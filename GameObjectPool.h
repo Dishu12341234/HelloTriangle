@@ -10,7 +10,7 @@
 
 struct alignas(16) ObjectData {
     glm::mat4 model;
-    glm::vec2 uv;
+    uint32_t tileIndex;
     glm::vec2 padding;
 };
 

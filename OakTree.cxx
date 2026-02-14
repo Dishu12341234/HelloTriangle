@@ -12,7 +12,7 @@ void OakTree::generateTree(glm::vec3 pos)
     {
         auto *sbm = new StandardBoxModel(WOOD_OAK_UVS, vkContext);
         sbm->transform.position = pos + glm::vec3(0, 0, z * 0.1f);
-        sbm->tileIndex = 2;
+        sbm->tileIndex = 3;
         gameObjectPool.appendGameObject(sbm);
     }
 
@@ -43,7 +43,7 @@ void OakTree::generateLeafLayer(glm::vec3 pos, float height, int size)
                           y * 0.1f - half,
                           height);
 
-            sbm->tileIndex = 3;
+            sbm->tileIndex = 4;
             gameObjectPool.appendGameObject(sbm);
         }
     }

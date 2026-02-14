@@ -1,54 +1,39 @@
 #version 450
-
 layout(binding = 0) uniform UniformBufferObject {
     mat4 model;
     mat4 view;
     mat4 proj;
 } ubo;
 
-struct ObjectData
-{
+struct ObjectData {
     mat4 model;
-    vec2 uv;
+    uint tileIndex;
 };
 
-layout(std430, binding = 2) buffer ObjectBuffer
-{
+layout(std430, binding = 2) buffer ObjectBuffer {
     ObjectData objects[];
 } objectBuffer;
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
 layout(location = 2) in vec2 inTexCoord;
-layout(location = 3) in uint tileIndex;
 
 layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
-//inside the c++ code for sake of learning I have use a push constant for ubo.proj as pc.data
-
-layout(push_constant) uniform PushConstants {
-    mat4 model;
-} pc;
-
 void main() {
-    //gl_Position = pc.data * ubo.view * ubo.model[gl_InstanceIndex] * vec4(inPosition, 1.0);
-    //gl_Position = ubo.proj * ubo.view * pc.model * vec4(inPosition, 1.0);
-    gl_Position = ubo.proj * ubo.view *
-              objectBuffer.objects[gl_InstanceIndex].model *
-              vec4(inPosition, 1.0);
-
-
+    gl_Position = ubo.proj * ubo.view * objectBuffer.objects[gl_InstanceIndex].model * vec4(inPosition, 1.0);
     fragColor = inColor;
+
+    // Compute UV offset from tileIndex
+    uint index = objectBuffer.objects[gl_InstanceIndex].tileIndex;
     float tilesPerRow = 20.0;
     float tileSize = 1.0 / tilesPerRow;
 
-    uint index = tileIndex;
     float x = float(index % 20u);
     float y = float(index / 20u);
 
     vec2 tileOffset = vec2(x, y) * tileSize;
 
     fragTexCoord = tileOffset + inTexCoord * tileSize;
-
 }
