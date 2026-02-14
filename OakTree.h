@@ -18,6 +18,7 @@ private:
 public:
     OakTree(GameObjectPool &gameObjectPool, VulkanContext &vkContext);
     void generateTree(glm::vec3 pos);
+    void generateLeafLayer(glm::vec3 pos, float height, int size);
     ~OakTree();
 };
 

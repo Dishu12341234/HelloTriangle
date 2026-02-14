@@ -14,27 +14,22 @@
 
 enum Face
 {
-    FRONT = 0,
-    BACK = 1,
+    TOP = 0,
+    BOTTOM = 1,
     LEFT = 2,
     RIGHT = 3,
-    TOP = 4,
-    BOTTOM = 5
+    FRONT = 4,
+    BACK = 5,
 };
 
 class StandardBoxModel : public GameObject
 {
 private:
-    float X_POSITIVE_UVIndexOffset{0};
-    float X_NEGATIVE_UVIndexOffset{0};
-    float Y_POSITIVE_UVIndexOffset{0};
-    float Y_NEGATIVE_UVIndexOffset{0};
-    float Z_POSITIVE_UVIndexOffset{0};
-    float Z_NEGATIVE_UVIndexOffset{0};
     VulkanContext vkContext;
+    std::array<float, 6> faceUVTextureOffsets;
 
 public:
-    StandardBoxModel(std::array<float, 6> faceUVTextureOffsets, VulkanContext vkContext);
+    StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsets, VulkanContext vkContext);
     void cleanUpResources() override;
     static glm::vec2 tileIndexToUV(uint32_t tileIndex);
     ~StandardBoxModel();

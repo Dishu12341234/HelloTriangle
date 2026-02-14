@@ -168,7 +168,7 @@ void HelloTriangleApplication::updateShaderStorageBuffer(uint32_t currentFrame)
     for (size_t i = 0; i < gameObjectPool.gameObjects.size(); i++)
     {
         data[i].model = glm::translate(glm::mat4(1.f), gameObjectPool.gameObjects.at(i)->transform.position);
-        data[i].uv =  StandardBoxModel::tileIndexToUV(gameObjectPool.gameObjects.at(i)->tileIndex);
+        data[i].uv =  StandardBoxModel::tileIndexToUV(gameObjectPool.gameObjects.at(i)->tileIndex);        
     }
 
     vkUnmapMemory(device, ssboBuffersMemory[currentFrame]);

@@ -16,49 +16,51 @@
 #include <fstream>
 #include <functional>
 
-//UBO
-struct UniformBufferObject {
+// UBO
+struct UniformBufferObject
+{
     glm::mat4 model;
     glm::mat4 view;
     glm::mat4 proj;
 };
 
-//PCS
+// PCS
 struct PushConstantC1
-{       
+{
     glm::mat4 model;
 };
 
-
-struct Vertex {
+struct Vertex
+{
     glm::vec3 pos;
     glm::vec3 color;
     glm::vec2 texCoord;
+    uint32_t tileIndex = 0;
 
-    //Telling vulkan how to setup binding
-    //Struct 1/2
+    // Telling vulkan how to setup binding
+    // Struct 1/2
     static VkVertexInputBindingDescription getBindingDescription();
-    //Struct 2/2
-    static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
+    // Struct 2/2
+    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions();
 
-    bool operator==(const Vertex& other) const {
-    return pos == other.pos && color == other.color && texCoord == other.texCoord;
-}
-
+    bool operator==(const Vertex &other) const
+    {
+        return pos == other.pos && color == other.color && texCoord == other.texCoord && tileIndex == other.tileIndex;
+    }
 };
 
-
-namespace std {
-    template<>
-    struct hash<Vertex> {
-        size_t operator()(Vertex const& vertex) const {
+namespace std
+{
+    template <>
+    struct hash<Vertex>
+    {
+        size_t operator()(Vertex const &vertex) const
+        {
             size_t seed = 0;
 
-            auto hashCombine = [&seed](auto const& v) {
-                seed ^= std::hash<float>()(v)
-                      + 0x9e3779b97f4a7c15
-                      + (seed << 6)
-                      + (seed >> 2);
+            auto hashCombine = [&seed](auto const &v)
+            {
+                seed ^= std::hash<float>()(v) + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
             };
 
             hashCombine(vertex.pos.x);
@@ -84,13 +86,13 @@ private:
     int height, width;
     VkExtent2D swapChainExtent;
     VkRenderPass renderPass;
-    VkDescriptorSetLayout* descriptorSetLayout;
+    VkDescriptorSetLayout *descriptorSetLayout;
     VkSampleCountFlagBits msaaSamples;
-    
-    public:
+
+public:
     VkPipelineLayout pipelineLayout;
-    VkPipeline graphicsPipeline;//shared
-    
+    VkPipeline graphicsPipeline; // shared
+
     u_GraphicsPipeline();
     ~u_GraphicsPipeline();
     void destroyPipelineLayout();
