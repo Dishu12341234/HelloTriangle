@@ -47,8 +47,8 @@ void Event::eventLoop()
     lastTime = currentTime;
 
     dt = std::chrono::duration<double, std::milli>(delta).count();
-    std::cout << "Δt = " << dt << std::endl;
-
+    // std::cout << "Δt = " << dt << std::endl;
+    std::cout << "FPS: " << 1000.f / dt << std::endl;
     glfwPollEvents();
 }
 

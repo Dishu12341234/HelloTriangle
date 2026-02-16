@@ -29,7 +29,7 @@ void HelloTriangleApplication::initGameObjects()
     tree.generateTree({0, 0, 0});
 
     Terrain terrain(context, gameObjectPool);
-    terrain.generateGrassLayer();
+    terrain.generateChunks();
 
 
     //upload

@@ -25,17 +25,17 @@ void Camera::updateUBO(UniformBufferObject &UBO,
     static float smoothDX = 0.0f;
     static float smoothDY = 0.0f;
 
+    float dt = event.dt * 0.001f; // ms -> seconds
+
     // ======== Mouse Delta ========
     double dx = lastX - event.mouseX;
-    double dy = lastY - event.mouseY; // invert Y (FPS style)
+    double dy = lastY - event.mouseY;
 
     lastX = event.mouseX;
     lastY = event.mouseY;
 
-    float dt = event.dt * 0.001f; // ms -> seconds
-
     // ======== Mouse Smoothing ========
-    float smoothing = 12.0f; // tune 8–20
+    float smoothing = 12.0f;
     float alpha = 1.0f - exp(-smoothing * dt);
 
     smoothDX += (dx - smoothDX) * alpha;
@@ -56,17 +56,23 @@ void Camera::updateUBO(UniformBufferObject &UBO,
     forward   = glm::normalize(forward);
 
     glm::vec3 worldUp(0.0f, 0.0f, 1.0f);
-    glm::vec3 right = glm::normalize(glm::cross(forward, worldUp));
+
+    // --- Flatten forward for ground movement ---
+    glm::vec3 forwardFlat = glm::normalize(
+        glm::vec3(forward.x, forward.y, 0.0f)
+    );
+
+    glm::vec3 right = glm::normalize(glm::cross(forwardFlat, worldUp));
 
     // ======== Movement ========
-    float speed = 5.0f; // units per second
+    float speed = 5.0f;
     float velocity = speed * dt;
 
     if (event.getKeyPressed(GLFW_KEY_W))
-        cameraPos += forward * velocity;
+        cameraPos += forwardFlat * velocity;
 
     if (event.getKeyPressed(GLFW_KEY_S))
-        cameraPos -= forward * velocity;
+        cameraPos -= forwardFlat * velocity;
 
     if (event.getKeyPressed(GLFW_KEY_A))
         cameraPos -= right * velocity;
@@ -95,6 +101,7 @@ void Camera::updateUBO(UniformBufferObject &UBO,
 
     UBO.proj[1][1] *= -1; // Vulkan clip correction
 }
+
     
 
 Camera::~Camera()
