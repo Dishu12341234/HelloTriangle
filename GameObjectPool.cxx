@@ -1,5 +1,7 @@
 #include "GameObjectPool.h"
 
+#include <thread>
+
 GameObjectPool::GameObjectPool()
 {
 }
@@ -28,62 +30,80 @@ void GameObjectPool::appendGameObject(GameObject *gameObject)
     this->gameObjects.push_back(gameObject);
 }
 
-void GameObjectPool::uploadVBOsAndIBOs()
+void GameObjectPool::initUpload()
 {
-    MeshUploader meshUploader;
+    uploadIndex = 0;
+    uploadInProgress = true;
 
-    VkCommandBuffer uploadCmd =
-        meshUploader.beginBatch(
-            vkContext.device,
-            vkContext.commandPool);
+    uploadCmd = meshUploader.beginBatch(
+        vkContext.device,
+        vkContext.commandPool);
+}
 
-    const size_t BATCH_SIZE = 16384;
+
+void GameObjectPool::uploadChunk()
+{
+    if (!uploadInProgress)
+        return;
+
+    const size_t MAX_UPLOADS_PER_FRAME = 8192; // tune this
+
     size_t total = gameObjects.size();
+    size_t uploads = 0;
 
-    for (size_t start = 0; start < total; start += BATCH_SIZE)
+    while (uploadIndex < total && uploads < MAX_UPLOADS_PER_FRAME)
     {
-        size_t end = std::min(start + BATCH_SIZE, total);
+        meshUploader.recordUpload(
+            vkContext,
+            *(gameObjects[uploadIndex]->mesh),
+            uploadCmd,
+            uploadGarbage);
 
-        for (size_t i = start; i < end; ++i)
-        {
-            meshUploader.recordUpload(
-                vkContext,
-                *(gameObjects[i]->mesh),
-                uploadCmd,
-                uploadGarbage);
-        }
-
-        // optional: submit / flush here if needed per batch
+        uploadIndex++;
+        uploads++;
     }
 
-    meshUploader.endBatch(vkContext, uploadCmd, uploadGarbage);
+    std::cout << "Uploaded " << 100.f * float(uploadIndex) / float(total) << "%" << std::endl;
+
+    // If finished uploading everything
+    if (uploadIndex >= total)
+    {
+        meshUploader.endBatch(
+            vkContext,
+            uploadCmd,
+            uploadGarbage);
+
+        uploadInProgress = false;
+        ready = true;
+    }
 }
+
 
 void GameObjectPool::drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescriptorSet> &descriptorSets, u_GraphicsPipeline &graphicsPipeline, VkExtent2D &swapChainExtent, uint64_t instanceCount, uint32_t &currentFrame)
 {
-    // for (auto &&gameObject : gameObjects)
-    // {
-    //     gameObject->drawIndexed(commandBuffer, descriptorSets, graphicsPipeline, swapChainExtent, instanceCount, currentFrame);
-    // }
+    for (auto &&gameObject : gameObjects)
+    {
+        gameObject->drawIndexed(commandBuffer, descriptorSets, graphicsPipeline, swapChainExtent, instanceCount, currentFrame);
+    }
 
-    auto mesh = gameObjects[1]->mesh;
+    // auto mesh = gameObjects[1]->mesh;
 
-    if (!mesh)
-        return;
+    // if (!mesh)
+    //     return;
 
-    VkBuffer vertexBuffers[] = {mesh->vertexBuffer};
-    VkDeviceSize offsets[] = {0};
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-    vkCmdBindIndexBuffer(commandBuffer, mesh->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    // VkBuffer vertexBuffers[] = {mesh->vertexBuffer};
+    // VkDeviceSize offsets[] = {0};
+    // vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+    // vkCmdBindIndexBuffer(commandBuffer, mesh->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.pipelineLayout, 0, 1, &(descriptorSets[currentFrame]), 0, nullptr);
+    // vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.pipelineLayout, 0, 1, &(descriptorSets[currentFrame]), 0, nullptr);
 
-    // PushConstantC1 c1;
-    // c1.model = glm::translate(glm::mat4(1.f), glm::vec3(transform.position));
+    // // PushConstantC1 c1;
+    // // c1.model = glm::translate(glm::mat4(1.f), glm::vec3(transform.position));
 
-    // vkCmdPushConstants(commandBuffer, graphicsPipeline.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstantC1), &c1);
+    // // vkCmdPushConstants(commandBuffer, graphicsPipeline.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstantC1), &c1);
 
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(mesh->indices.size()), gameObjects.size(), 0, 0, 0);
+    // vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(mesh->indices.size()), gameObjects.size(), 0, 0, 0);
 }
 
 void GameObjectPool::cleanUpResources()

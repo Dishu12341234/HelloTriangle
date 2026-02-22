@@ -16,17 +16,19 @@ void GameObject::loadMesh(GameMeshObject *mesh)
 
 void GameObject::loadGeometry(std::string modelPath)
 {
-    this->mesh = new GameMeshObject(modelPath);
+    if (!mesh)
+        this->mesh = new GameMeshObject(modelPath);
 }
 
 void GameObject::loadGeometry(std::vector<Vertex> vertices, std::vector<uint32_t> indices)
 {
-    this->mesh = new GameMeshObject();
+    if (!mesh)
+        this->mesh = new GameMeshObject();
     this->mesh->vertices = vertices;
     this->mesh->indices = indices;
 }
 
-void GameObject::uploadVBOsAndIBOs()
+void GameObject::initUpload()
 {
     if (!mesh)
         return;
@@ -45,9 +47,10 @@ void GameObject::drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescr
 {
     if (!mesh)
         return;
-
+    // std::cout << GOID << std::endl;
     VkBuffer vertexBuffers[] = {mesh->vertexBuffer};
     VkDeviceSize offsets[] = {0};
+
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
     vkCmdBindIndexBuffer(commandBuffer, mesh->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
@@ -55,10 +58,16 @@ void GameObject::drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescr
 
     PushConstantC1 c1;
     c1.model = glm::translate(glm::mat4(1.f), glm::vec3(transform.position));
+    c1.tileIndex[0] = faceUVTextureOffsets[0];
+    c1.tileIndex[1] = faceUVTextureOffsets[1];
+    c1.tileIndex[2] = faceUVTextureOffsets[2];
+    c1.tileIndex[3] = faceUVTextureOffsets[3];
+    c1.tileIndex[4] = faceUVTextureOffsets[4];
+    c1.tileIndex[5] = faceUVTextureOffsets[5];
 
     vkCmdPushConstants(commandBuffer, graphicsPipeline.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstantC1), &c1);
 
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(mesh->indices.size()), instanceCount, 0, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(mesh->indices.size()), 1, 0, 0, 0);
 }
 
 uint32_t GameObject::getID()

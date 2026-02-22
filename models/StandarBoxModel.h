@@ -12,16 +12,6 @@
 #define WOOD_OAK_UVS {3, 3, 3, 3, 3, 3}
 #define LEAF_OAK_UVS {4, 4, 4, 4, 4, 4}
 
-enum Face
-{
-    TOP = 0,
-    BOTTOM = 1,
-    LEFT = 2,
-    RIGHT = 3,
-    FRONT = 4,
-    BACK = 5,
-};
-
 // vkContext can be romoved
 
 class StandardBoxModel : public GameObject
@@ -34,6 +24,7 @@ public:
     StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsets, VulkanContext vkContext);
     void cleanUpResources() override;
     static glm::vec2 tileIndexToUV(uint32_t tileIndex);
+    void removeFace(Face face);
     ~StandardBoxModel();
 };
 

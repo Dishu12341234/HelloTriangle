@@ -17,8 +17,6 @@ void Camera::updateUBO(UniformBufferObject &UBO,
     static float yaw   = -90.0f;
     static float pitch = 0.0f;
 
-    static glm::vec3 cameraPos(2.0f, 2.0f, 0.0f);
-
     static double lastX = event.mouseX;
     static double lastY = event.mouseY;
 
@@ -65,7 +63,7 @@ void Camera::updateUBO(UniformBufferObject &UBO,
     glm::vec3 right = glm::normalize(glm::cross(forwardFlat, worldUp));
 
     // ======== Movement ========
-    float speed = 5.0f;
+    float speed = 2.0f;
     float velocity = speed * dt;
 
     if (event.getKeyPressed(GLFW_KEY_W))
@@ -102,7 +100,10 @@ void Camera::updateUBO(UniformBufferObject &UBO,
     UBO.proj[1][1] *= -1; // Vulkan clip correction
 }
 
-    
+glm::vec3 Camera::gePositionInWorldCoords()
+{
+    return cameraPos * 10.f;
+}
 
 Camera::~Camera()
 {

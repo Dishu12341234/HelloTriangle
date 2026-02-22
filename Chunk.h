@@ -6,15 +6,23 @@
 #include "models/StandarBoxModel.h"
 #include "GameObjectPool.h"
 
+struct Layer
+{
+    StandardBoxModel* blocks[16][16];
+    int z;
+};
+
 class Chunk
 {
 private:
-    //              z   x   y
-    uint16_t blocks[64][16][16];
+    //              
+    Layer layers[64];
+    uint16_t chunkId{UINT16_MAX};
     GameObjectPool &gameObjectPool;
     VulkanContext &vkContext;
+    glm::vec2 offset{0, 0}; // offset in chunk index not it position
 
-    friend class Chunk;
+    friend class Terrain;
 
 public:
     Chunk(GameObjectPool &gameObjectPool, VulkanContext &vkContext);

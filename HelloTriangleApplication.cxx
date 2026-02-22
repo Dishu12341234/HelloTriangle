@@ -5,6 +5,12 @@ void HelloTriangleApplication::mainLoop()
     while (!glfwWindowShouldClose(_window))
     {
         event->eventLoop();
+        if(!gameObjectPool.ready)
+        {
+            gameObjectPool.uploadChunk();
+            continue;
+        }
+
         drawFrame();
     }
 }
@@ -85,6 +91,7 @@ void HelloTriangleApplication::cleanup()
 
     delete event;
     delete camera;
+    delete terrain;
 
     vkDestroyBuffer(device, indexBuffer, nullptr);
     vkFreeMemory(device, indexBufferMemory, nullptr);

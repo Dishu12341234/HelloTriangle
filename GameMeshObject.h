@@ -29,6 +29,9 @@ private:
     friend class GameObject;
     friend class GameObjectPool;
     friend class HelloTriangleApplication;
+    friend class Chunk;
+    friend class StandardBoxModel;
+
 public:
     GameMeshObject();
     GameMeshObject(std::string modelPath);

@@ -14,11 +14,22 @@ struct d_Rect3D // dimessions_rect
     int w, h, b;
 };
 
-
 struct Transform
 {
     glm::vec3 position;
 };
+
+
+enum Face
+{
+    TOP = 0,
+    BOTTOM = 1,
+    LEFT = 2,
+    RIGHT = 3,
+    FRONT = 4,
+    BACK = 5,
+};
+
 
 class GameObject
 {
@@ -31,19 +42,26 @@ private:
     std::vector<PendingUpload> uploadGarbage;
     friend class StandardBoxModel;
     friend class GameObjectPool;
-    
-    public:
+
+public:
     uint32_t faceUVTextureOffsets[6];
     int tileIndex{0};
+
     GameMeshObject *mesh = nullptr;
     Transform transform;
+
     GameObject(VulkanContext vkContext);
+
     void loadMesh(GameMeshObject *mesh);
     void loadGeometry(std::string);
-    void loadGeometry(std::vector<Vertex> vertices, std::vector<uint32_t> indices); 
-    void uploadVBOsAndIBOs();
+    void loadGeometry(std::vector<Vertex> vertices, std::vector<uint32_t> indices);
+    
+    void initUpload();
     void drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescriptorSet> &descriptorSets, u_GraphicsPipeline &graphicsPipeline, VkExtent2D &swapChainExtent, uint64_t &instanceCount, uint32_t &currentFrame);
+
     uint32_t getID();
+    // void removeFace(Face face);
+
     virtual void cleanUpResources();
     virtual ~GameObject() = default;
 };

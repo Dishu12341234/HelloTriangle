@@ -10,6 +10,12 @@ struct ObjectData {
     uint tileIndex[6];
 };
 
+layout(push_constant) uniform PushConstantC1
+{
+    mat4 model;
+    uint tileIndex[6];
+} pc;
+
 layout(std430, binding = 2) buffer ObjectBuffer {
     ObjectData objects[];
 } objectBuffer;
@@ -23,11 +29,11 @@ layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
-    gl_Position = ubo.proj * ubo.view * objectBuffer.objects[gl_InstanceIndex].model * vec4(inPosition, 1.0);
+    gl_Position = ubo.proj * ubo.view * pc.model * vec4(inPosition, 1.0);
     fragColor = inColor;
 
     // Compute UV offset from tileIndex
-    uint index = objectBuffer.objects[gl_InstanceIndex].tileIndex[vertexIndex / 4];
+    uint index = pc.tileIndex[vertexIndex / 4];
     float tilesPerRow = 20.0;
     float tileSize = 1.0 / tilesPerRow;
 
@@ -36,5 +42,5 @@ void main() {
 
     vec2 tileOffset = vec2(x, y) * tileSize;
 
-    fragTexCoord = tileOffset + inTexCoord * tileSize;
+    fragTexCoord =  tileOffset + inTexCoord * tileSize;
 }

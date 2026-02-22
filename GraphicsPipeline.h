@@ -28,6 +28,7 @@ struct UniformBufferObject
 struct PushConstantC1
 {
     glm::mat4 model;
+    uint32_t tileIndex[6];
 };
 
 struct Vertex

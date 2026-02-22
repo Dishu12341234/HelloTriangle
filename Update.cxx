@@ -23,19 +23,33 @@ void HelloTriangleApplication::initGameObjects()
     camera = new Camera(context);
     gameObjectPool.init(context);
 
-    //Generation
+    // Generation
 
     OakTree tree(gameObjectPool, context);
     tree.generateTree({0, 0, 0});
 
-    Terrain terrain(context, gameObjectPool);
-    terrain.generateChunks();
+    terrain = new Terrain(context, gameObjectPool);
+    terrain->generateChunks();
 
+    // upload
+    // std::cout << "Before" << std::endl;
+    // std::cout << "After" << std::endl;
 
-    //upload
-    std::cout << "Before" << std::endl;
-    gameObjectPool.uploadVBOsAndIBOs();
-    std::cout << "After" << std::endl;
+    StandardBoxModel *testBlock = new StandardBoxModel({0, 1, 1, 1, 1, 1}, context);
+    testBlock->removeFace(TOP);
+    std::cout << testBlock->getID() << std::endl;
+
+    testBlock->transform.position.x = 0;
+    testBlock->transform.position.y = 0;
+    testBlock->transform.position.z = 1.6f;
+
+    gameObjectPool.appendGameObject(testBlock);
+
+    gameObjectPool.initUpload();
+    // std::cout << "Before: " << testBlock->mesh->vertices.size() << std::endl;
+    // testBlock->removeFace(Face::TOP);
+    // std::cout << "After: " << testBlock->mesh->vertices.size() << std::endl;
+    // TODO add faces on demand not as default
 }
 
 void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)
@@ -46,9 +60,11 @@ void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
     UniformBufferObject ubo{};
+    ubo.model = glm::translate(glm::mat4(1.f), glm::vec3(1, 1, 1));
     int key = glfwGetKey(_window, GLFW_KEY_ESCAPE);
     if (key == GLFW_PRESS)
     {
+        glfwSetWindowShouldClose(_window, true);
         menu = !menu;
         if (menu)
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -57,6 +73,14 @@ void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)
     }
 
     camera->updateUBO(ubo, swapChainExtent, *event);
+    
+    glm::vec3 coordinates = camera->gePositionInWorldCoords();
+    auto block = terrain->getBlock(coordinates.x, coordinates.y, coordinates.z);
+    if (block)
+    {
+        std::cout << block->getID() << std::endl;
+    }
+    std::cout << "(x,y,z):(" << coordinates.x << "," << coordinates.y << "," << coordinates.z << ")" << std::endl;
 
     memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
