@@ -6,21 +6,48 @@ Chunk::Chunk(GameObjectPool &gameObjectPool, VulkanContext &vkContext) : gameObj
 
 void Chunk::generateChunk()
 {
+    // for (uint32_t z = 0; z < ZD; z++)
+    // {
+    //     for (size_t x = 0; x < 16; x++)
+    //     {
+    //         for (size_t y = 0; y < 16; y++)
+    //         {
+    //             StandardBoxModel *sbm = new StandardBoxModel({0, 1, 1, 1, 1, 1}, vkContext);
+    //             sbm->transform.position.x = x / 10.f + offset.x * 1.6f;
+    //             sbm->transform.position.y = y / 10.f + offset.y * 1.6f;
+    //             sbm->transform.position.z = z / 10.f - 64 / 10.f;
+    //             // sbm->removeFace(TOP);
+    //             layers[z].blocks[x][y] = sbm;
+    //             layers[z].z = ZD - z;
+    //             gameObjectPool.appendGameObject(sbm);
+    //         }
+    //     }
+    // }
 
-    for (uint32_t z = 0; z < 64; z++)
+    for (uint32_t z = 0; z < 256; z++)
     {
+        layers[z].z = z;
         for (size_t x = 0; x < 16; x++)
         {
             for (size_t y = 0; y < 16; y++)
             {
-                StandardBoxModel *sbm = new StandardBoxModel({0, 1, 1, 1, 1, 1}, vkContext);
-                sbm->transform.position.x = x / 10.f + offset.x * 1.6f;
-                sbm->transform.position.y = y / 10.f + offset.y * 1.6f;
-                sbm->transform.position.z = z / 10.f - 64 / 10.f;
-                // sbm->removeFace(TOP);
-                layers[63 - z].blocks[x][y] = sbm;
-                layers[63 - z].z = z - 64;
-                gameObjectPool.appendGameObject(sbm);
+                layers[z].blocks[x][y] = nullptr;
+            }
+        }
+        if (z < ZD)
+        {
+            for (size_t x = 0; x < 16; x++)
+            {
+                for (size_t y = 0; y < 16; y++)
+                {
+                    StandardBoxModel *sbm = new StandardBoxModel({0, 1, 1, 1, 1, 1}, vkContext);
+                    sbm->transform.position.x = x / 10.f + offset.x * 1.6f;
+                    sbm->transform.position.y = y / 10.f + offset.y * 1.6f;
+                    sbm->transform.position.z = z / 10.f - ZD / 10.f;
+                    // sbm->removeFace(TOP);
+                    layers[z].blocks[x][y] = sbm;
+                    gameObjectPool.appendGameObject(sbm);
+                }
             }
         }
     }

@@ -2,6 +2,8 @@
 
 StandardBoxModel::StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsetsa, VulkanContext vkContext) : GameObject{vkContext}
 {
+    objectType = ObjectType::StandardBoxModel;
+
     this->vkContext = vkContext;
     faceUVTextureOffsets[0] = faceUVTextureOffsetsa[0];
     faceUVTextureOffsets[1] = faceUVTextureOffsetsa[1];
@@ -11,6 +13,7 @@ StandardBoxModel::StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsetsa, 
     faceUVTextureOffsets[5] = faceUVTextureOffsetsa[5];
     std::vector<Vertex> vertices;
     vertices.reserve(24);
+
 
     // +Z FRONT
     vertices.emplace_back(glm::vec3{-0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 0.f}, 0);
@@ -60,12 +63,17 @@ StandardBoxModel::StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsetsa, 
     // removeFace(TOP);
     
 }
-
 void StandardBoxModel::removeFace(Face face)
 {
-    size_t vertexStart = face * 4;
+    if(!mesh)
+        return;
+    size_t faceCount = mesh->indices.size() / 6;
+    if (face >= faceCount)
+        return;
+
     size_t indexStart  = face * 6;
-    
+    size_t vertexStart = mesh->indices[indexStart];
+
     // Remove indices
     mesh->indices.erase(
         mesh->indices.begin() + indexStart,
@@ -85,8 +93,44 @@ void StandardBoxModel::removeFace(Face face)
             idx -= 4;
     }
 
-    // Recreate GPU buffers
     loadGeometry(mesh->vertices, mesh->indices);
+}
+
+void StandardBoxModel::removeFace(GameObject *go, Face face)
+{
+    if(!go)
+        return;
+    
+    if(go->objectType != ObjectType::StandardBoxModel)
+        return;
+
+    size_t faceCount = go->mesh->indices.size() / 6;
+    if (face >= faceCount)
+        return;
+
+    size_t indexStart  = face * 6;
+    size_t vertexStart = go->mesh->indices[indexStart];
+
+    // Remove indices
+    go->mesh->indices.erase(
+        go->mesh->indices.begin() + indexStart,
+        go->mesh->indices.begin() + indexStart + 6
+    );
+
+    // Remove vertices
+    go->mesh->vertices.erase(
+        go->mesh->vertices.begin() + vertexStart,
+        go->mesh->vertices.begin() + vertexStart + 4
+    );
+
+    // Fix shifted indices
+    for (auto& idx : go->mesh->indices)
+    {
+        if (idx > vertexStart)
+            idx -= 4;
+    }
+
+    go->loadGeometry(go->mesh->vertices, go->mesh->indices);
 }
 
 void StandardBoxModel::cleanUpResources()

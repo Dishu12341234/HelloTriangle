@@ -25,8 +25,8 @@ void HelloTriangleApplication::initGameObjects()
 
     // Generation
 
-    OakTree tree(gameObjectPool, context);
-    tree.generateTree({0, 0, 0});
+    // OakTree tree(gameObjectPool, context);
+    // tree.generateTree({0, 0, 0});
 
     terrain = new Terrain(context, gameObjectPool);
     terrain->generateChunks();
@@ -36,17 +36,27 @@ void HelloTriangleApplication::initGameObjects()
     // std::cout << "After" << std::endl;
 
     StandardBoxModel *testBlock = new StandardBoxModel({0, 1, 1, 1, 1, 1}, context);
-    testBlock->removeFace(TOP);
+    StandardBoxModel *testBlock1 = new StandardBoxModel({0, 1, 1, 1, 1, 1}, context);
+    // testBlock->removeFace(LEFT);
+    // testBlock->removeFace(RIGHT);
+    // testBlock->removeFace(BOTTOM);
     std::cout << testBlock->getID() << std::endl;
+    std::cout << testBlock1->getID() << std::endl;
 
     testBlock->transform.position.x = 0;
     testBlock->transform.position.y = 0;
     testBlock->transform.position.z = 1.6f;
 
-    gameObjectPool.appendGameObject(testBlock);
+    terrain->appendBlockToTerrain(testBlock);
+
+    testBlock1->transform.position.x = 0.1f;
+    testBlock1->transform.position.y = 0;
+    testBlock1->transform.position.z = 1.6f;
+
+    terrain->appendBlockToTerrain(testBlock1);
 
     gameObjectPool.initUpload();
-    // std::cout << "Before: " << testBlock->mesh->vertices.size() << std::endl;
+    // std::cout << "Before: " << testBlock1->mesh->vertices.size() << std::endl;
     // testBlock->removeFace(Face::TOP);
     // std::cout << "After: " << testBlock->mesh->vertices.size() << std::endl;
     // TODO add faces on demand not as default
@@ -72,15 +82,29 @@ void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
-    camera->updateUBO(ubo, swapChainExtent, *event);
-    
-    glm::vec3 coordinates = camera->gePositionInWorldCoords();
-    auto block = terrain->getBlock(coordinates.x, coordinates.y, coordinates.z);
-    if (block)
+    static bool rWasPressed = false;
+    bool rPressedNow = glfwGetKey(_window, GLFW_KEY_R) == GLFW_PRESS;
+
+    if (rPressedNow && !rWasPressed)
     {
-        std::cout << block->getID() << std::endl;
+        std::cout << "Re-upload triggered\n";
+        gameObjectPool.reuploadAll();
     }
-    std::cout << "(x,y,z):(" << coordinates.x << "," << coordinates.y << "," << coordinates.z << ")" << std::endl;
+
+    rWasPressed = rPressedNow;
+
+    camera->updateUBO(ubo, swapChainExtent, *event);
+
+    glm::vec3 coordinates = camera->gePositionInWorldCoords();
+    auto b = terrain->getBlock(coordinates.x, coordinates.y, coordinates.z);
+    if (b)
+        b->removeFace(TOP);
+    // auto block = terrain->getBlock(coordinates.x, coordinates.y, coordinates.z);
+    // if (block)
+    // {
+    //     std::cout << block->getID() << std::endl;
+    // }
+    // std::cout << "(x,y,z):(" << coordinates.x << "," << coordinates.y << "," << coordinates.z << ")" << std::endl;
 
     memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }

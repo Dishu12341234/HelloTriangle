@@ -37,6 +37,7 @@ public:
     GameMeshObject(std::string modelPath);
     void loadMeshModel(std::string modelPath);
     void cleanUpResources();
+    void destroyGPU(VkDevice device);
     ~GameMeshObject();
 };
 

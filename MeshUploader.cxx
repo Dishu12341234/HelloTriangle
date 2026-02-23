@@ -88,7 +88,11 @@ void MeshUploader::recordUpload(
     VkCommandBuffer cmd,
     std::vector<PendingUpload> &garbage)
 {
+
     mesh.vkContext = vkContext;
+
+    if (mesh.vertices.empty())
+        return;
 
     /* ===================== VERTEX BUFFER ===================== */
 
@@ -123,7 +127,7 @@ void MeshUploader::recordUpload(
         vkContext.physicalDevice,
         memReq.memoryTypeBits,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     vkAllocateMemory(
         vkContext.device,
@@ -223,7 +227,7 @@ void MeshUploader::recordUpload(
             vkContext.physicalDevice,
             memReq.memoryTypeBits,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
         vkAllocateMemory(
             vkContext.device,

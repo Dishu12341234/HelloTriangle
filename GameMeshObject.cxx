@@ -75,6 +75,33 @@ void GameMeshObject::cleanUpResources()
     vkFreeMemory(vkContext.device, vertexBufferMemory, nullptr);
 }
 
+void GameMeshObject::destroyGPU(VkDevice device)
+{
+    if (vertexBuffer != VK_NULL_HANDLE)
+    {
+        vkDestroyBuffer(device, vertexBuffer, nullptr);
+        vertexBuffer = VK_NULL_HANDLE;
+    }
+
+    if (vertexBufferMemory != VK_NULL_HANDLE)
+    {
+        vkFreeMemory(device, vertexBufferMemory, nullptr);
+        vertexBufferMemory = VK_NULL_HANDLE;
+    }
+
+    if (indexBuffer != VK_NULL_HANDLE)
+    {
+        vkDestroyBuffer(device, indexBuffer, nullptr);
+        indexBuffer = VK_NULL_HANDLE;
+    }
+
+    if (indexBufferMemory != VK_NULL_HANDLE)
+    {
+        vkFreeMemory(device, indexBufferMemory, nullptr);
+        indexBufferMemory = VK_NULL_HANDLE;
+    }
+}
+
 GameMeshObject::~GameMeshObject()
 {
     

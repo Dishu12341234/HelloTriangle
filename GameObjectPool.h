@@ -24,6 +24,10 @@ private:
     bool uploadInProgress = false;
     VkCommandBuffer uploadCmd = VK_NULL_HANDLE;
     MeshUploader meshUploader;
+    friend class Terrain;
+    class Terrain *terrain = nullptr;
+
+    friend class HelloTriangleApplication;
 
 public:
     VulkanContext vkContext;
@@ -41,6 +45,7 @@ public:
     void initUpload();
     void uploadChunk();
     void drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescriptorSet> &descriptorSets, u_GraphicsPipeline &graphicsPipeline, VkExtent2D &swapChainExtent, uint64_t instanceCount, uint32_t &currentFrame);
+    void reuploadAll();
     void cleanUpResources();
     ~GameObjectPool();
 };

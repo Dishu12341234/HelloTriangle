@@ -1,6 +1,8 @@
 #ifndef CHUNK_H
 #define CHUNK_H
 
+#define ZD 4
+
 #include <optional>
 
 #include "models/StandarBoxModel.h"
@@ -8,15 +10,15 @@
 
 struct Layer
 {
-    StandardBoxModel* blocks[16][16];
+    StandardBoxModel *blocks[16][16]{nullptr};
     int z;
 };
 
 class Chunk
 {
 private:
-    //              
-    Layer layers[64];
+    //
+    Layer layers[256];
     uint16_t chunkId{UINT16_MAX};
     GameObjectPool &gameObjectPool;
     VulkanContext &vkContext;
