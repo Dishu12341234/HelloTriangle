@@ -1,5 +1,4 @@
 #include "GameObjectPool.h"
-#include "Terrain.h"
 
 #include <thread>
 
@@ -29,55 +28,6 @@ GameObject *GameObjectPool::createNewGameObject()
 void GameObjectPool::appendGameObject(GameObject *gameObject)
 {
     this->gameObjects.push_back(gameObject);
-    if (gameObject->objectType == ObjectType::StandardBoxModel)
-    {
-        return;
-        if (!terrain)
-            return;
-        std::cout << "Reducing mesh" << std::endl;
-
-        auto left = terrain->getBlock(int(gameObject->transform.position.x * 10) + 1, gameObject->transform.position.y, gameObject->transform.position.z);
-        if (left)
-        {
-            StandardBoxModel::removeFace(gameObject, RIGHT);
-            left->removeFace(LEFT);
-        }
-
-        auto right = terrain->getBlock(int(gameObject->transform.position.x * 10) - 1, gameObject->transform.position.y, gameObject->transform.position.z);
-        if (right)
-        {
-            StandardBoxModel::removeFace(gameObject, LEFT);
-            right->removeFace(RIGHT);
-        }
-
-        auto bottom = terrain->getBlock(gameObject->transform.position.x, gameObject->transform.position.y, int(gameObject->transform.position.z * 10) - 1);
-        if (bottom)
-        {
-            StandardBoxModel::removeFace(gameObject, TOP);
-            bottom->removeFace(BOTTOM);
-        }
-
-        auto top = terrain->getBlock(gameObject->transform.position.x, gameObject->transform.position.y, int(gameObject->transform.position.z * 10) + 1);
-        if (top)
-        {
-            StandardBoxModel::removeFace(gameObject, BOTTOM);
-            top->removeFace(TOP);
-        }
-
-        auto front = terrain->getBlock(gameObject->transform.position.x, int(gameObject->transform.position.y * 10) + 1, gameObject->transform.position.z);
-        if (front)
-        {
-            StandardBoxModel::removeFace(gameObject, BACK);
-            front->removeFace(FRONT);
-        }
-
-        auto back = terrain->getBlock(gameObject->transform.position.x, int(gameObject->transform.position.y * 10) - 1, gameObject->transform.position.z);
-        if (back)
-        {
-            StandardBoxModel::removeFace(gameObject, FRONT);
-            back->removeFace(BACK);
-        }
-    }
 }
 
 void GameObjectPool::initUpload()

@@ -24,8 +24,6 @@ private:
     bool uploadInProgress = false;
     VkCommandBuffer uploadCmd = VK_NULL_HANDLE;
     MeshUploader meshUploader;
-    friend class Terrain;
-    class Terrain *terrain = nullptr;
 
     friend class HelloTriangleApplication;
 

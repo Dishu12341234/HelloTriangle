@@ -91,7 +91,6 @@ void HelloTriangleApplication::cleanup()
 
     delete event;
     delete camera;
-    delete terrain;
 
     vkDestroyBuffer(device, indexBuffer, nullptr);
     vkFreeMemory(device, indexBufferMemory, nullptr);

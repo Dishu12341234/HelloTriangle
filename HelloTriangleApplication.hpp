@@ -11,7 +11,6 @@
 #include "GameObjectPool.h"
 #include "Camera.h"
 #include "Event.h"
-#include "Terrain.h"
 
 class HelloTriangleApplication
 {
@@ -20,7 +19,6 @@ private:
     bool menu = false;
     Event *event;
     Camera *camera;
-    Terrain *terrain;
     bool keyStateA = false;
 
     const int MAX_FRAMES_IN_FLIGHT = 2;
