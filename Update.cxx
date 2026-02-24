@@ -1,6 +1,7 @@
 #include "HelloTriangleApplication.hpp"
 #include "GameMeshObject.h"
 #include "models/StandarBoxModel.h"
+#include "Chunk.h"
 #include <cstdlib>
 #include <cstring>
 #include <memory>
@@ -21,29 +22,21 @@ void HelloTriangleApplication::initGameObjects()
     camera = new Camera(context);
     gameObjectPool.init(context);
 
-    StandardBoxModel *testBlock = new StandardBoxModel({0, 1, 1, 1, 1, 1}, context);
-    StandardBoxModel *testBlock1 = new StandardBoxModel({0, 1, 1, 1, 1, 1}, context);
+    StandardBoxModel *testBlock = gameObjectPool.createNewBoxModelAndAppend({40, 30, 0}, {0, 1, 1, 1, 1, 1});
+    StandardBoxModel *testBlock1 = gameObjectPool.createNewBoxModelAndAppend({41, 30, 0}, {2, 1, 1, 1, 1, 1});
+    StandardBoxModel *testBlock2 = gameObjectPool.createNewBoxModelAndAppend({41, 31, 0}, {3, 1, 1, 1, 1, 1});
     
-    gameObjectPool.appendGameObject(testBlock1);
-    gameObjectPool.appendGameObject(testBlock);
+    StandardBoxModel *testBlock3 = gameObjectPool.createNewBoxModelAndAppend({41, 31, 2}, {0, 1, 1, 1, 1, 1});
+    // testBlock3->removeFace(FRONT);
+    // testBlock3->faceUVTextureOffsets[LEFT] = 2;
+    // testBlock3->faceUVTextureOffsets[RIGHT] = 4;
 
-    std::cout << testBlock->getID() << std::endl;
-    std::cout << testBlock1->getID() << std::endl;
 
-    testBlock->transform.position.x = 0;
-    testBlock->transform.position.y = 0;
-    testBlock->transform.position.z = 1.6f;
-
-    testBlock1->transform.position.x = 0.1f;
-    testBlock1->transform.position.y = 0;
-    testBlock1->transform.position.z = 1.6f;
-
-    testBlock->removeFace(LEFT);
-    testBlock1->removeFace(RIGHT);
-
+    Chunk c(&gameObjectPool);
+    c.setOffset({0, 0});
+    c.generateChunks();
 
     gameObjectPool.initUpload();
-
 }
 
 void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)

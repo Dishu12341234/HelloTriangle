@@ -29,7 +29,12 @@ layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
-    gl_Position = ubo.proj * ubo.view * pc.model * vec4(inPosition, 1.0);
+    mat4 scaledModel = pc.model;
+
+    // Multiply only the translation (last column, xyz) by 2
+    //scaledModel[3].xyz *= 2.0;
+
+    gl_Position = ubo.proj * ubo.view * scaledModel * vec4(inPosition, 1.0);
     fragColor = inColor;
 
     // Compute UV offset from tileIndex

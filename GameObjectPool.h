@@ -3,13 +3,14 @@
 
 #define MAX_OBJS 65536 * 5
 
-#include <vector>
+#include <unordered_map>
 #include <string.h>
 #include <atomic>
 
 #include <thread>
 
 #include "GameObject.h"
+#include "models/StandarBoxModel.h"
 
 struct alignas(16) ObjectData
 {
@@ -29,7 +30,7 @@ private:
 
 public:
     VulkanContext vkContext;
-    std::vector<GameObject *> gameObjects;
+    std::unordered_map<uint64_t, GameObject *> gameObjects;
     std::vector<PendingUpload> uploadGarbage;
     std::vector<glm::mat4> modelMatrices;
 
@@ -39,6 +40,10 @@ public:
     void init(VulkanContext context);
     GameObject *createNewGameObject(std::string modelPath);
     GameObject *createNewGameObject();
+
+    StandardBoxModel *createNewBoxModelAndAppend(glm::vec3 blockCoord, std::vector<uint32_t> faceUVTextureOffsets);
+    StandardBoxModel *getBlock(uint64_t goid);
+
     void appendGameObject(GameObject *);
     void initUpload();
     void uploadChunk();

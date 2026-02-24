@@ -18,7 +18,11 @@ class StandardBoxModel : public GameObject
 {
 private:
     VulkanContext vkContext;
-    uint8_t blockID{UINT8_MAX};
+    uint8_t blockID{UINT8_MAX};   
+    
+    std::array<bool, 6> faces;
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
 
 public:
     StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsets, VulkanContext vkContext);

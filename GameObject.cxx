@@ -47,6 +47,14 @@ void GameObject::drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescr
 {
     if (!mesh)
         return;
+
+    if (mesh->vertexBuffer == VK_NULL_HANDLE ||
+        mesh->indexBuffer == VK_NULL_HANDLE)
+    {
+        return; // skip this object
+    }
+    if (mesh->indices.size() == 0)
+        return;
     // std::cout << GOID << std::endl;
     VkBuffer vertexBuffers[] = {mesh->vertexBuffer};
     VkDeviceSize offsets[] = {0};

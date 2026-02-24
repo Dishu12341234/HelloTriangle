@@ -25,9 +25,30 @@ GameObject *GameObjectPool::createNewGameObject()
     return gameObject;
 }
 
+StandardBoxModel *GameObjectPool::createNewBoxModelAndAppend(glm::vec3 blockCoord, std::vector<uint32_t> faceUVTextureOffsets)
+{
+    StandardBoxModel *model = new StandardBoxModel(faceUVTextureOffsets, vkContext);
+    model->transform.position = blockCoord / 10.f;
+    appendGameObject(model);
+
+    return model;
+}
+
+StandardBoxModel *GameObjectPool::getBlock(uint64_t goid)
+{
+    auto it = gameObjects.find(goid);
+    if (it != gameObjects.end())
+    {
+        if (it->second->objectType == ObjectType::StandardBoxModel)
+            return static_cast<StandardBoxModel *>(it->second);
+    }
+
+    return nullptr;
+}
+
 void GameObjectPool::appendGameObject(GameObject *gameObject)
 {
-    this->gameObjects.push_back(gameObject);
+    this->gameObjects.insert({gameObject->getID(), gameObject});
 }
 
 void GameObjectPool::initUpload()
@@ -79,7 +100,7 @@ void GameObjectPool::uploadChunk()
 
 void GameObjectPool::drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescriptorSet> &descriptorSets, u_GraphicsPipeline &graphicsPipeline, VkExtent2D &swapChainExtent, uint64_t instanceCount, uint32_t &currentFrame)
 {
-    for (auto &&gameObject : gameObjects)
+    for (auto &&[goid, gameObject] : gameObjects)
     {
         gameObject->drawIndexed(commandBuffer, descriptorSets, graphicsPipeline, swapChainExtent, instanceCount, currentFrame);
     }
@@ -112,7 +133,7 @@ void GameObjectPool::cleanUpResources()
 {
     vkDeviceWaitIdle(vkContext.device);
 
-    for (auto& go : gameObjects)
+    for (auto &[goid, go] : gameObjects)
     {
         if (go->mesh)
             go->mesh->destroyGPU(vkContext.device);

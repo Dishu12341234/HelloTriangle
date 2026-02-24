@@ -11,9 +11,15 @@ StandardBoxModel::StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsetsa, 
     faceUVTextureOffsets[3] = faceUVTextureOffsetsa[3];
     faceUVTextureOffsets[4] = faceUVTextureOffsetsa[4];
     faceUVTextureOffsets[5] = faceUVTextureOffsetsa[5];
-    std::vector<Vertex> vertices;
-    vertices.reserve(24);
 
+    faces[0] = true;
+    faces[1] = true;
+    faces[2] = true;
+    faces[3] = true;
+    faces[4] = true;
+    faces[5] = true;
+
+    vertices.reserve(24);
 
     // +Z FRONT
     vertices.emplace_back(glm::vec3{-0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 0.f}, 0);
@@ -51,7 +57,7 @@ StandardBoxModel::StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsetsa, 
     vertices.emplace_back(glm::vec3{0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 1.f}, 22);
     vertices.emplace_back(glm::vec3{-0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 1.f}, 23);
 
-    std::vector<uint32_t> indices = {
+    indices = {
         0, 1, 2, 2, 3, 0,
         4, 5, 6, 6, 7, 4,
         8, 9, 10, 10, 11, 8,
@@ -61,76 +67,74 @@ StandardBoxModel::StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsetsa, 
 
     loadGeometry(vertices, indices);
     // removeFace(TOP);
-    
 }
+
 void StandardBoxModel::removeFace(Face face)
 {
-    if(!mesh)
-        return;
-    size_t faceCount = mesh->indices.size() / 6;
-    if (face >= faceCount)
+    if (!faces[face])
         return;
 
-    size_t indexStart  = face * 6;
-    size_t vertexStart = mesh->indices[indexStart];
+    faces[face] = false;
 
-    // Remove indices
-    mesh->indices.erase(
-        mesh->indices.begin() + indexStart,
-        mesh->indices.begin() + indexStart + 6
-    );
-
-    // Remove vertices
-    mesh->vertices.erase(
-        mesh->vertices.begin() + vertexStart,
-        mesh->vertices.begin() + vertexStart + 4
-    );
-
-    // Fix shifted indices
-    for (auto& idx : mesh->indices)
+    const float s = 0.05f;
+    struct FaceDef
     {
-        if (idx > vertexStart)
-            idx -= 4;
+        glm::vec3 positions[4];
+        glm::vec2 uvs[4] = {
+            {0.f, 0.f},
+            {1.f, 0.f},
+            {1.f, 1.f},
+            {0.f, 1.f}
+        };
+    };
+
+    const FaceDef faceDefs[6] =
+    {
+        // FRONT (+Z) [0]
+        { { {-s, -s,  s}, { s, -s,  s}, { s,  s,  s}, {-s,  s,  s} } },
+        // BACK  (-Z) [1]
+        { { { s, -s, -s}, {-s, -s, -s}, {-s,  s, -s}, { s,  s, -s} } },
+        // LEFT  (-X) [2]
+        { { {-s, -s, -s}, {-s, -s,  s}, {-s,  s,  s}, {-s,  s, -s} } },
+        // RIGHT (+X) [3]
+        { { { s, -s,  s}, { s, -s, -s}, { s,  s, -s}, { s,  s,  s} } },
+        // TOP   (+Y) [4]
+        { { {-s,  s,  s}, { s,  s,  s}, { s,  s, -s}, {-s,  s, -s} } },
+        // BOTTOM(-Y) [5]
+        { { {-s, -s, -s}, { s, -s, -s}, { s, -s,  s}, {-s, -s,  s} } },
+    };
+
+    vertices.clear();
+    indices.clear();
+    vertices.reserve(24);
+
+    for (int f = 0; f < 6; f++)
+    {
+        if (!faces[f])
+            continue;
+
+        uint32_t startIndex = static_cast<uint32_t>(vertices.size());
+        const FaceDef& fd = faceDefs[f];
+
+        for (int i = 0; i < 4; i++)
+        {
+            vertices.emplace_back(
+                fd.positions[i],
+                glm::vec3{s},
+                fd.uvs[i],
+                static_cast<uint32_t>(f * 4 + i) // preserve original face slot
+            );
+        }
+
+        indices.push_back(startIndex + 0);
+        indices.push_back(startIndex + 1);
+        indices.push_back(startIndex + 2);
+        indices.push_back(startIndex + 2);
+        indices.push_back(startIndex + 3);
+        indices.push_back(startIndex + 0);
     }
 
-    loadGeometry(mesh->vertices, mesh->indices);
-}
-
-void StandardBoxModel::removeFace(GameObject *go, Face face)
-{
-    if(!go)
-        return;
-    
-    if(go->objectType != ObjectType::StandardBoxModel)
-        return;
-
-    size_t faceCount = go->mesh->indices.size() / 6;
-    if (face >= faceCount)
-        return;
-
-    size_t indexStart  = face * 6;
-    size_t vertexStart = go->mesh->indices[indexStart];
-
-    // Remove indices
-    go->mesh->indices.erase(
-        go->mesh->indices.begin() + indexStart,
-        go->mesh->indices.begin() + indexStart + 6
-    );
-
-    // Remove vertices
-    go->mesh->vertices.erase(
-        go->mesh->vertices.begin() + vertexStart,
-        go->mesh->vertices.begin() + vertexStart + 4
-    );
-
-    // Fix shifted indices
-    for (auto& idx : go->mesh->indices)
-    {
-        if (idx > vertexStart)
-            idx -= 4;
-    }
-
-    go->loadGeometry(go->mesh->vertices, go->mesh->indices);
+    loadGeometry(vertices, indices);
 }
 
 void StandardBoxModel::cleanUpResources()
