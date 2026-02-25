@@ -4,6 +4,11 @@
 #include "GraphicsPipeline.h"
 #include "Event.h"
 
+struct Crosshair
+{
+    
+};
+
 class Camera
 {
 private:

@@ -1,5 +1,52 @@
 #include "Chunk.h"
 
+#include <cmath>
+
+// Simple hash-based noise (no external library needed)
+float noise2D(int x, int y, int seed = 42)
+{
+    int n = x + y * 57 + seed * 131;
+    n = (n << 13) ^ n;
+    return 1.0f - ((n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0f;
+}
+
+float smoothNoise(float x, float y)
+{
+    int ix = (int)x, iy = (int)y;
+    float fx = x - ix, fy = y - iy;
+
+    // Smoothstep
+    float ux = fx * fx * (3 - 2 * fx);
+    float uy = fy * fy * (3 - 2 * fy);
+
+    float v1 = noise2D(ix, iy);
+    float v2 = noise2D(ix + 1, iy);
+    float v3 = noise2D(ix, iy + 1);
+    float v4 = noise2D(ix + 1, iy + 1);
+
+    return v1 + ux * (v2 - v1) + uy * (v3 - v1) + ux * uy * (v1 - v2 - v3 + v4);
+}
+
+// Octave noise for more natural terrain
+float terrainHeight(float worldX, float worldY)
+{
+    float value = 0;
+    float amplitude = 1.0f;
+    float frequency = 0.05f;
+    float max = 0;
+
+    for (int o = 0; o < 4; o++)
+    {
+        value += smoothNoise(worldX * frequency, worldY * frequency) * amplitude;
+        max += amplitude;
+        amplitude *= 0.5f;
+        frequency *= 2.0f;
+    }
+
+    value /= max;                 // normalize to -1..1
+    return (value + 1.0f) / 2.0f; // remap to 0..1
+}
+
 Chunk::Chunk(GameObjectPool *GOP) : gameObjectPool{GOP}
 {
     if (!GOP)
@@ -19,84 +66,63 @@ void Chunk::generateChunks()
 {
     for (size_t k = 0; k < LAYER_COUNT; k++)
     {
-        if (k < 3)
+        // if ((k > 14)&&(k < 16))
+        //     for (size_t i = 0; i < 16; i++)
+        //     {
+        //         for (size_t j = 0; j < 16; j++)
+        //         {
+        //             BlockCoord coord{i + 16 * chunkOffset.x, j + 16 * chunkOffset.y, k};
+        //             uint64_t blockID = gameObjectPool->createNewBoxModelAndAppend({coord.x, coord.y, coord.z}, (k > 10)
+        //                                                                                                            ? std::vector<uint32_t>{0, 1, 1, 1, 1, 1}
+        //                                                                                                            : std::vector<uint32_t>{5, 5, 5, 5, 5, 5})
+        //                                    ->getID();
+
+        //             // Emplace (won’t overwrite existing)
+        //             auto [it, inserted] = blocks.emplace(coord, blockID);
+        //         }
+        //     }
+        if (k >= 16 && k < 20)
+        {
             for (size_t i = 0; i < 16; i++)
             {
                 for (size_t j = 0; j < 16; j++)
                 {
-                    BlockCoord coord{i + 16 * chunkOffset.x, j + 16 * chunkOffset.y, k};
-                    uint64_t blockID = gameObjectPool->createNewBoxModelAndAppend({coord.x, coord.y, coord.z}, {0, 1, 1, 1, 1, 1})->getID();
+                    int worldX = i + 16 * chunkOffset.x;
+                    int worldY = j + 16 * chunkOffset.y;
 
-                    // Emplace (won’t overwrite existing)
-                    auto [it, inserted] = blocks.emplace(coord, blockID);
+                    // Simple pseudo height function
+                    float height =
+                        18.0f +
+                        2.0f * sin(worldX * 0.15f) +
+                        2.0f * cos(worldY * 0.15f);
+
+                    if (k <= height)
+                    {
+                        BlockCoord coord{worldX, worldY, k};
+
+                        uint64_t blockID =
+                            gameObjectPool
+                                ->createNewBoxModelAndAppend(
+                                    {coord.x, coord.y, coord.z},
+                                    {0, 1, 1, 1, 1, 1})
+                                ->getID();
+
+                        blocks.emplace(coord, blockID);
+                    }
                 }
             }
-    }
-    for (int k = 0; k < LAYER_COUNT; k++)
-    {
-        if (k < 3)
-            for (int i = 0; i < 16; i++)
-            {
-                for (int j = 0; j < 16; j++)
-                {
-                    cullHiddenFaces(getBlockFromCoords(BlockCoord{i + int(16 * chunkOffset.x), j + int(16 * chunkOffset.y), k}, *this, *gameObjectPool));
-                }
-            }
-    }
-}
-void Chunk::cullHiddenFaces(StandardBoxModel *model)
-{
-    int blockX = model->transform.position.x * 10.f - 16 * chunkOffset.x;
-    int blockY = model->transform.position.y * 10.f - 16 * chunkOffset.y;
-    int blockZ = model->transform.position.z * 10.f;
-
-    auto top = getBlockFromCoords({blockX, blockY, blockZ + 1}, (*this), *gameObjectPool);
-    auto bottom = getBlockFromCoords({blockX, blockY, blockZ - 1}, (*this), *gameObjectPool);
-    auto left = getBlockFromCoords({blockX + 1, blockY, blockZ}, (*this), *gameObjectPool);
-    auto right = getBlockFromCoords({blockX - 1, blockY, blockZ}, (*this), *gameObjectPool);
-    auto front = getBlockFromCoords({blockX, blockY + 1, blockZ}, (*this), *gameObjectPool);
-    auto back = getBlockFromCoords({blockX, blockY - 1, blockZ}, (*this), *gameObjectPool);
-
-    if (top)
-    {
-        top->removeFace(BOTTOM); // remove bottom face of top neighbor
-        model->removeFace(TOP);  // remove top face of current model
+        }
     }
 
-    if (bottom)
-    {
-        bottom->removeFace(TOP);   // remove top face of bottom neighbor
-        model->removeFace(BOTTOM); // remove bottom face of current model
-    }
-
-    if (left)
-    {
-        left->removeFace(RIGHT); // remove right face of left neighbor
-        model->removeFace(LEFT); // remove left face of current model
-    }
-
-    if (right)
-    {
-        right->removeFace(LEFT);  // remove left face of right neighbor
-        model->removeFace(RIGHT); // remove right face of current model
-    }
-
-    if (front)
-    {
-        front->removeFace(BACK);  // remove back face of front neighbor
-        model->removeFace(FRONT); // remove front face of current model
-    }
-
-    if (back)
-    {
-        back->removeFace(FRONT); // remove front face of back neighbor
-        model->removeFace(BACK); // remove back face of current model
-    }
-}
-StandardBoxModel *Chunk::getBlockFromCoords(BlockCoord coords, Chunk &chunk, GameObjectPool &gop)
-{
-    auto it = chunk.blocks.find(coords);
-    if (it != chunk.blocks.end())
-        return gop.getBlock(it->second);
-    return nullptr;
+    // for (int k = 0; k < LAYER_COUNT; k++)
+    // {
+    //     if (k < 32)
+    //         for (int i = 0; i < 16; i++)
+    //         {
+    //             for (int j = 0; j < 16; j++)
+    //             {
+    //                 cullHiddenFaces(getBlockFromCoords(BlockCoord{i + int(16 * chunkOffset.x), j + int(16 * chunkOffset.y), k}, *this, *gameObjectPool));
+    //             }
+    //         }
+    // }
 }

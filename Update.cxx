@@ -25,16 +25,18 @@ void HelloTriangleApplication::initGameObjects()
     StandardBoxModel *testBlock = gameObjectPool.createNewBoxModelAndAppend({40, 30, 0}, {0, 1, 1, 1, 1, 1});
     StandardBoxModel *testBlock1 = gameObjectPool.createNewBoxModelAndAppend({41, 30, 0}, {2, 1, 1, 1, 1, 1});
     StandardBoxModel *testBlock2 = gameObjectPool.createNewBoxModelAndAppend({41, 31, 0}, {3, 1, 1, 1, 1, 1});
-    
+
     StandardBoxModel *testBlock3 = gameObjectPool.createNewBoxModelAndAppend({41, 31, 2}, {0, 1, 1, 1, 1, 1});
     // testBlock3->removeFace(FRONT);
     // testBlock3->faceUVTextureOffsets[LEFT] = 2;
     // testBlock3->faceUVTextureOffsets[RIGHT] = 4;
 
+    terrain = new Terrain(context, gameObjectPool);
+    terrain->loadChunks();
 
-    Chunk c(&gameObjectPool);
-    c.setOffset({0, 0});
-    c.generateChunks();
+    // Chunk c(&gameObjectPool);
+    // c.setOffset({0, 0});
+    // c.generateChunks();
 
     gameObjectPool.initUpload();
 }

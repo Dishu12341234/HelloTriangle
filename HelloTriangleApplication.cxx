@@ -88,9 +88,11 @@ void HelloTriangleApplication::cleanup()
     vkDeviceWaitIdle(device);
 
     gameObjectPool.cleanUpResources();
+    // terrain->cleanUp();
 
     delete event;
     delete camera;
+    delete terrain;
 
     vkDestroyBuffer(device, indexBuffer, nullptr);
     vkFreeMemory(device, indexBufferMemory, nullptr);

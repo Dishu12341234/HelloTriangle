@@ -41,8 +41,17 @@ public:
     void setOffset(glm::vec2 chunkOffset);
 
     void generateChunks();
-    void cullHiddenFaces(StandardBoxModel *model);
-    static StandardBoxModel *getBlockFromCoords(BlockCoord coords, Chunk &chunk, GameObjectPool &gop);
+    const glm::vec2& getOffset() const { return chunkOffset; }
+
+    std::unordered_map<BlockCoord, uint64_t, BlockCoordHash>& getBlocks()
+    {
+        return blocks;
+    }
+
+    const std::unordered_map<BlockCoord, uint64_t, BlockCoordHash>& getBlocks() const
+    {
+        return blocks;
+    }
 };
 
 #endif
