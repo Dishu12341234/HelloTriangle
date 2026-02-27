@@ -11,16 +11,9 @@ BUILD_DIR := build
 SRC_DIR   := .
 
 # =========================
-# PCH
-# =========================
-PCH_HEADER := pcm.h
-PCH_SOURCE := pcm.cxx
-PCH_OUTPUT := $(BUILD_DIR)/pch.h.gch
-
-# =========================
 # Sources
 # =========================
-SRCS := $(wildcard $(SRC_DIR)/*.cxx) $(PCH_SOURCE)
+SRCS := $(wildcard $(SRC_DIR)/*.cxx)
 OBJS := $(patsubst %.cxx,$(BUILD_DIR)/%.o,$(notdir $(SRCS)))
 
 # =========================
@@ -41,8 +34,8 @@ LINUX_VULKAN_SDK := /home/divyansh/SDKs/vksdk/1.4.335.0/x86_64
 COMMON_CXXFLAGS := -std=c++2b -Wall -g -O1 \
 	-fsanitize=address -fno-omit-frame-pointer \
 	-MMD -MP \
-	-I/usr/include \
-	-include $(PCH_HEADER)
+	-lprofiler \
+	-I/usr/include
 
 MAC_CXXFLAGS := $(COMMON_CXXFLAGS) \
 	-I$(MAC_VULKAN_SDK)/macOS/include
@@ -62,8 +55,7 @@ MAC_LDFLAGS := $(COMMON_LDFLAGS) \
 	-framework Metal \
 	-Wl,-rpath,$(MAC_VULKAN_SDK)/macOS/lib
 
-LINUX_LDFLAGS := $(COMMON_LDFLAGS) \
-	-L$(LINUX_VULKAN_SDK)/lib -lvulkan
+LINUX_LDFLAGS := $(COMMON_LDFLAGS) -L$(LINUX_VULKAN_SDK)/lib -lvulkan
 
 # =========================
 # Colors
@@ -79,7 +71,7 @@ RESET  := \033[0m
 # =========================
 .PHONY: all clean
 
-all: $(BUILD_DIR) $(PCH_OUTPUT)
+all: $(BUILD_DIR)
 ifeq ($(UNAME_S),Darwin)
 	@echo -e "$(YELLOW)Building for macOS...$(RESET)"
 	$(MAKE) $(MAC_EXEC)
@@ -88,18 +80,6 @@ ifeq ($(UNAME_S),Darwin)
 else
 	@echo -e "$(YELLOW)Building for Linux...$(RESET)"
 	$(MAKE) $(LINUX_EXEC)
-endif
-
-# =========================
-# PCH Build
-# =========================
-$(PCH_OUTPUT): $(PCH_HEADER)
-	@mkdir -p $(BUILD_DIR)
-	@echo -e "$(YELLOW)Building PCH$(RESET)"
-ifeq ($(UNAME_S),Darwin)
-	$(CXX) $(MAC_CXXFLAGS) -x c++-header $(PCH_HEADER) -o $@
-else
-	$(CXX) $(LINUX_CXXFLAGS) -x c++-header $(PCH_HEADER) -o $@
 endif
 
 # =========================
@@ -114,7 +94,7 @@ $(LINUX_EXEC): $(OBJS)
 	$(CXX) $(OBJS) $(LINUX_CXXFLAGS) $(LINUX_LDFLAGS) -o $@
 
 # Object compilation
-$(BUILD_DIR)/%.o: %.cxx $(PCH_OUTPUT)
+$(BUILD_DIR)/%.o: %.cxx
 	@mkdir -p $(BUILD_DIR)
 	@echo -e "$(YELLOW)Compiling $(BGMAGENTA)$<$(RESET)"
 ifeq ($(UNAME_S),Darwin)

@@ -82,26 +82,26 @@ void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)
 
 void HelloTriangleApplication::updateShaderStorageBuffer(uint32_t currentFrame)
 {
-    VkDeviceSize bufferSize = sizeof(ObjectData) * gameObjectPool.gameObjects.size();
+    // VkDeviceSize bufferSize = sizeof(ObjectData) * gameObjectPool.gameObjects.size();
 
-    ObjectData *data;
-    vkMapMemory(device,
-                ssboBuffersMemory[currentFrame],
-                0,
-                bufferSize,
-                0,
-                (void **)&data);
+    // ObjectData *data;
+    // vkMapMemory(device,
+    //             ssboBuffersMemory[currentFrame],
+    //             0,
+    //             bufferSize,
+    //             0,
+    //             (void **)&data);
 
-    for (size_t i = 0; i < gameObjectPool.gameObjects.size(); i++)
-    {
-        data[i].model = glm::translate(glm::mat4(1.f), gameObjectPool.gameObjects.at(i)->transform.position);
-        data[i].tileIndex[0] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[0]);
-        data[i].tileIndex[1] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[1]);
-        data[i].tileIndex[2] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[2]);
-        data[i].tileIndex[3] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[3]);
-        data[i].tileIndex[4] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[4]);
-        data[i].tileIndex[5] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[5]);
-    }
+    // for (size_t i = 0; i < gameObjectPool.gameObjects.size(); i++)
+    // {
+    //     data[i].model = glm::translate(glm::mat4(1.f), gameObjectPool.gameObjects.at(i)->transform.position);
+    //     data[i].tileIndex[0] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[0]);
+    //     data[i].tileIndex[1] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[1]);
+    //     data[i].tileIndex[2] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[2]);
+    //     data[i].tileIndex[3] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[3]);
+    //     data[i].tileIndex[4] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[4]);
+    //     data[i].tileIndex[5] = (gameObjectPool.gameObjects.at(i)->faceUVTextureOffsets[5]);
+    // }
 
-    vkUnmapMemory(device, ssboBuffersMemory[currentFrame]);
+    // vkUnmapMemory(device, ssboBuffersMemory[currentFrame]);
 }

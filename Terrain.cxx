@@ -6,9 +6,9 @@ Terrain::Terrain(VulkanContext &context, GameObjectPool &gop) : vkContext{contex
 
 void Terrain::loadChunks()
 {
-    for (int y = -3; y <= 3; y++)
+    for (int y = -5; y <= 5; y++)
     {
-        for (int x = -3; x <= 3; x++)
+        for (int x = -5; x <= 5; x++)
         {
             loadedChunks.emplace_back(&gameObjectPool);
             loadedChunks.back().setOffset({x, y});
