@@ -125,4 +125,58 @@ void Chunk::generateChunks()
     //             }
     //         }
     // }
+
+    chunkMeshObject = gameObjectPool->createNewGameObject();
+
+    std::vector<Vertex> vertices;
+
+    // +Y TOP
+    float tileSize = 0.1f;
+    int N = 16;
+
+    for (int x = 0; x < N; x++)
+    {
+        for (int y = 0; y < N; y++)
+        {
+            float fx = x * tileSize + chunkOffset.x * N * tileSize - tileSize / 2;
+            float fy = y * tileSize + chunkOffset.y * N * tileSize - tileSize / 2;
+
+            float zHeight = 0.0f;
+            int z;
+            for (z = 255; z >= -1; z--)
+            {
+                auto it = blocks.find({x + chunkOffset.x * N, y + chunkOffset.y * N, z});
+                if (it != blocks.end())
+                {
+                    zHeight = z * tileSize + .4226;
+                    chunkMeshObject->faceUVTextureOffsets[0] = gameObjectPool->getBlock(it->second)->faceUVTextureOffsets[TOP];
+                    break;
+                }
+            }
+            if (z > 0)
+            {
+                vertices.emplace_back(glm::vec3{fx, fy, zHeight}, glm::vec3{tileSize}, glm::vec2{0, 0}, 0);
+                vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight}, glm::vec3{tileSize}, glm::vec2{1, 0}, 1);
+                vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight}, glm::vec3{tileSize}, glm::vec2{1, 1}, 2);
+                vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight}, glm::vec3{tileSize}, glm::vec2{0, 1}, 3);
+            }
+        }
+    }
+
+    std::vector<uint32_t> indices;
+    for (size_t i = 0; i < N * N; i++)
+    {
+        indices.push_back(4 * i);
+        indices.push_back(4 * i + 1);
+        indices.push_back(4 * i + 2);
+        indices.push_back(4 * i + 2);
+        indices.push_back(4 * i + 3);
+        indices.push_back(4 * i);
+    }
+
+    chunkMeshObject->loadGeometry(vertices, indices);
+    chunkMeshObject->transform.position.y = 0;
+    chunkMeshObject->transform.position.x = 0;
+
+    gameObjectPool->appendGameObject(chunkMeshObject);
 }

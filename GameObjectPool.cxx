@@ -102,6 +102,7 @@ void GameObjectPool::drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkD
 {
     for (auto &&[goid, gameObject] : gameObjects)
     {
+        if(gameObject->objectType == ObjectType::StandardBoxModel)
         gameObject->drawIndexed(commandBuffer, descriptorSets, graphicsPipeline, swapChainExtent, instanceCount, currentFrame);
     }
 

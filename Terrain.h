@@ -12,6 +12,7 @@ private:
     GameObjectPool &gameObjectPool;
     std::vector<Chunk> loadedChunks;
 
+    
 public:
     Terrain(VulkanContext &context, GameObjectPool &gop);
     void loadChunks();
@@ -21,6 +22,7 @@ public:
 
     void cullAllBlocks();
     void cullBlock(StandardBoxModel *model, BlockCoord world);
+    void drawChunks(VkCommandBuffer &commandBuffer, std::vector<VkDescriptorSet> &descriptorSets, u_GraphicsPipeline &graphicsPipeline, VkExtent2D &swapChainExtent, uint64_t instanceCount, uint32_t &currentFrame);
     ~Terrain();
 };
 

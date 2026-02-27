@@ -30,6 +30,7 @@ private:
     friend class GameObjectPool;
     friend class HelloTriangleApplication;
     friend class Chunk;
+    friend class Terrain;
     friend class StandardBoxModel;
 
 public:

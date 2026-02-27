@@ -45,7 +45,7 @@ struct Vertex
 
     bool operator==(const Vertex &other) const
     {
-        return pos == other.pos && color == other.color && texCoord == other.texCoord;
+        return pos == other.pos && color == other.color;
     }
 };
 
@@ -88,6 +88,7 @@ private:
     VkRenderPass renderPass;
     VkDescriptorSetLayout *descriptorSetLayout;
     VkSampleCountFlagBits msaaSamples;
+    friend class DebugPipeline;
 
 public:
     VkPipelineLayout pipelineLayout;
@@ -101,7 +102,7 @@ public:
 
     static std::vector<char> readFile(const std::string &filename);
 
-    void createGraphicsPipeline();
+    virtual void createGraphicsPipeline();
     VkShaderModule createShaderModule(const std::vector<char> &code);
 };
 #endif

@@ -6,6 +6,7 @@
 #include <chrono>
 #include "Textures.hpp"
 #include "GraphicsPipeline.h"
+#include "DebugPipeline.h"
 #include "GameMeshObject.h"
 #include "MeshUploader.h"
 #include "GameObjectPool.h"
@@ -136,6 +137,7 @@ private:
     void createDescriptorSetLayout();
 
     u_GraphicsPipeline graphicsPipeline;
+    DebugPipeline debugPipeline;;
 
     void initGameObjects();
 

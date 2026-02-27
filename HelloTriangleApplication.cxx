@@ -5,13 +5,58 @@ void HelloTriangleApplication::mainLoop()
     while (!glfwWindowShouldClose(_window))
     {
         event->eventLoop();
-        if(!gameObjectPool.ready)
+        if (!gameObjectPool.ready)
         {
             gameObjectPool.uploadChunk();
             continue;
         }
 
         drawFrame();
+    }
+}
+
+void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+{
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = 0;
+    beginInfo.pInheritanceInfo = nullptr;
+
+    if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to begin recording command buffer!");
+    }
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = renderPass;
+    renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
+
+    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.extent = swapChainExtent;
+
+    std::array<VkClearValue, 2> clearValues{};
+    clearValues[0].color = {{0.01f, 0.16f, 0.3f, 1.0f}};
+    clearValues[1].depthStencil = {1.0f, 0};
+
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+    renderPassInfo.pClearValues = clearValues.data();
+
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    // ---- Main Objects ----
+    // vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.graphicsPipeline);
+    // gameObjectPool.drawIndexed(commandBuffer, descriptorSets, graphicsPipeline, swapChainExtent, 1, currentFrame);
+
+    // ---- Debug / Terrain ----
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, debugPipeline.graphicsPipeline);
+    terrain->drawChunks(commandBuffer, descriptorSets, debugPipeline, swapChainExtent, 1, currentFrame);
+
+    vkCmdEndRenderPass(commandBuffer);
+
+    if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to record command buffer!");
     }
 }
 
@@ -125,6 +170,7 @@ void HelloTriangleApplication::cleanup()
         vkDestroyFramebuffer(device, framebuffer, nullptr);
 
     graphicsPipeline.destroyPipelineLayout();
+    debugPipeline.destroyPipelineLayout();
     vkDestroyRenderPass(device, renderPass, nullptr);
 
     for (auto imageView : swapChainImageViews)

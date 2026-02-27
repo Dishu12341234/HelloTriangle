@@ -33,7 +33,9 @@ private:
 
     glm::vec2 chunkOffset{0, 0};
     std::unordered_map<BlockCoord, uint64_t, BlockCoordHash> blocks;
+    GameObject *chunkMeshObject = nullptr;
 
+    friend class Terrain;
 public:
     Chunk(GameObjectPool *);
     ~Chunk();
