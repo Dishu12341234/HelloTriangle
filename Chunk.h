@@ -43,6 +43,7 @@ public:
     void setOffset(glm::vec2 chunkOffset);
 
     void generateChunks();
+    void generateChunkMesh();
     const glm::vec2& getOffset() const { return chunkOffset; }
 
     std::unordered_map<BlockCoord, uint64_t, BlockCoordHash>& getBlocks()

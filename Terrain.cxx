@@ -6,9 +6,9 @@ Terrain::Terrain(VulkanContext &context, GameObjectPool &gop) : vkContext{contex
 
 void Terrain::loadChunks()
 {
-    for (int y = -5; y <= 5; y++)
+    for (int y = -1; y <= 1; y++)
     {
-        for (int x = -5; x <= 5; x++)
+        for (int x = -1; x <= 1; x++)
         {
             loadedChunks.emplace_back(&gameObjectPool);
             loadedChunks.back().setOffset({x, y});
@@ -16,6 +16,11 @@ void Terrain::loadChunks()
         }
     }
     cullAllBlocks();
+    for (auto &chunk : loadedChunks)
+    {
+        chunk.generateChunkMesh();
+    }
+
 }
 Chunk *Terrain::getChunk(int chunkX, int chunkY)
 {

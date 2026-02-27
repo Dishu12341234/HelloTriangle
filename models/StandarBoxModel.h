@@ -24,6 +24,8 @@ private:
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
 
+    friend class Chunk;
+
 public:
     StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsets, VulkanContext vkContext);
     void cleanUpResources() override;
