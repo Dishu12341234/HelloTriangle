@@ -156,21 +156,18 @@ void Chunk::generateChunkMesh()
                 if (!block)
                     continue;
 
-
                 if ((block->mesh->indices.size() == 0) || (block->mesh->vertices.size() == 0))
                     continue;
 
                 zHeight = z * tileSize + .4226;
 
-                
-
                 if (block->faces[TOP])
                 {
                     chunkMeshObject->faceUVTextureOffsets[TOP] = block->faceUVTextureOffsets[TOP];
-                    vertices.emplace_back(glm::vec3{fx, fy, zHeight}, glm::vec3{tileSize}, glm::vec2{0, 0}, 0);
-                    vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight}, glm::vec3{tileSize}, glm::vec2{1, 0}, 1);
-                    vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight}, glm::vec3{tileSize}, glm::vec2{1, 1}, 2);
-                    vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight}, glm::vec3{tileSize}, glm::vec2{0, 1}, 3);
+                    vertices.emplace_back(glm::vec3{fx, fy, zHeight}, glm::vec3{tileSize}, block->faceUVTextureOffsets[TOP], 0);
+                    vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight}, glm::vec3{tileSize}, block->faceUVTextureOffsets[TOP], 1);
+                    vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight}, glm::vec3{tileSize}, block->faceUVTextureOffsets[TOP], 2);
+                    vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight}, glm::vec3{tileSize}, block->faceUVTextureOffsets[TOP], 3);
                     n++;
                 }
 
@@ -178,43 +175,31 @@ void Chunk::generateChunkMesh()
                 {
                     chunkMeshObject->faceUVTextureOffsets[BOTTOM] = block->faceUVTextureOffsets[BOTTOM];
 
-                    vertices.emplace_back(glm::vec3{fx, fy, zHeight - tileSize}, glm::vec3{tileSize}, glm::vec2{0, 0}, 4);
-                    vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight - tileSize}, glm::vec3{tileSize}, glm::vec2{1, 0}, 5);
-                    vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight - tileSize}, glm::vec3{tileSize}, glm::vec2{1, 1}, 6);
-                    vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight - tileSize}, glm::vec3{tileSize}, glm::vec2{0, 1}, 7);
+                    vertices.emplace_back(glm::vec3{fx, fy, zHeight - tileSize}, glm::vec3{tileSize}, block->faceUVTextureOffsets[BOTTOM], 0);
+                    vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight - tileSize}, glm::vec3{tileSize}, block->faceUVTextureOffsets[BOTTOM], 1);
+                    vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight - tileSize}, glm::vec3{tileSize}, block->faceUVTextureOffsets[BOTTOM], 2);
+                    vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight - tileSize}, glm::vec3{tileSize}, block->faceUVTextureOffsets[BOTTOM], 3);
                     n++;
                 }
 
                 if (block->faces[LEFT])
                 {
                     chunkMeshObject->faceUVTextureOffsets[LEFT] = block->faceUVTextureOffsets[LEFT];
-                    // chunkMeshObject->faceUVTextureOffsets[TOP] = 5;
-                    std::cout
-                    << block->faces[TOP]
-                    << block->faces[BOTTOM]
-                    << block->faces[LEFT]
-                    << block->faces[RIGHT]
-                    << block->faces[FRONT]
-                    << block->faces[BACK]
-                    << " | chunk : (x,y) ("
-                    << chunkOffset.x << ","
-                    << chunkOffset.y << ")"
-                    << std::endl;
 
-                    vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight - tileSize}, glm::vec3{tileSize}, glm::vec2{0, 0}, 12);
-                    vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight - tileSize}, glm::vec3{tileSize}, glm::vec2{1, 0}, 13);
-                    vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight}, glm::vec3{tileSize}, glm::vec2{1, 1}, 14);
-                    vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight}, glm::vec3{tileSize}, glm::vec2{0, 1}, 15);
+                    vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight - tileSize}, glm::vec3{tileSize}, block->faceUVTextureOffsets[LEFT], 0);
+                    vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight - tileSize}, glm::vec3{tileSize}, block->faceUVTextureOffsets[LEFT], 1);
+                    vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight}, glm::vec3{tileSize}, block->faceUVTextureOffsets[LEFT], 2);
+                    vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight}, glm::vec3{tileSize}, block->faceUVTextureOffsets[LEFT], 3);
                     n++;
                 }
 
                 if (block->faces[RIGHT])
                 {
                     chunkMeshObject->faceUVTextureOffsets[RIGHT] = block->faceUVTextureOffsets[RIGHT];
-                    vertices.emplace_back(glm::vec3{fx, fy, zHeight - tileSize}, glm::vec3{tileSize}, glm::vec2{0, 0}, 8);
-                    vertices.emplace_back(glm::vec3{fx, fy, zHeight}, glm::vec3{tileSize}, glm::vec2{1, 0}, 9);
-                    vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight}, glm::vec3{tileSize}, glm::vec2{1, 1}, 10);
-                    vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight - tileSize}, glm::vec3{tileSize}, glm::vec2{0, 1}, 11);
+                    vertices.emplace_back(glm::vec3{fx, fy, zHeight - tileSize}, glm::vec3{tileSize}, block->faceUVTextureOffsets[RIGHT], 0);
+                    vertices.emplace_back(glm::vec3{fx, fy, zHeight}, glm::vec3{tileSize}, block->faceUVTextureOffsets[RIGHT], 1);
+                    vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight}, glm::vec3{tileSize}, block->faceUVTextureOffsets[RIGHT], 2);
+                    vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight - tileSize}, glm::vec3{tileSize}, block->faceUVTextureOffsets[RIGHT], 3);
                     n++;
                 }
 
@@ -222,29 +207,22 @@ void Chunk::generateChunkMesh()
                 {
                     chunkMeshObject->faceUVTextureOffsets[FRONT] = block->faceUVTextureOffsets[FRONT];
 
-                    vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight - tileSize}, glm::vec3{tileSize}, glm::vec2{0, 0}, 16);
-                    vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight}, glm::vec3{tileSize}, glm::vec2{1, 0}, 17);
-                    vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight}, glm::vec3{tileSize}, glm::vec2{1, 1}, 18);
-                    vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight - tileSize}, glm::vec3{tileSize}, glm::vec2{0, 1}, 19);
+                    vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight - tileSize}, glm::vec3{tileSize}, block->faceUVTextureOffsets[FRONT], 0);
+                    vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight}, glm::vec3{tileSize}, block->faceUVTextureOffsets[FRONT], 1);
+                    vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight}, glm::vec3{tileSize}, block->faceUVTextureOffsets[FRONT], 2);
+                    vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight - tileSize}, glm::vec3{tileSize}, block->faceUVTextureOffsets[FRONT], 3);
                     n++;
                 }
 
                 if (block->faces[BACK])
                 {
                     chunkMeshObject->faceUVTextureOffsets[BACK] = block->faceUVTextureOffsets[BACK];
-                    vertices.emplace_back(glm::vec3{fx, fy, zHeight - tileSize}, glm::vec3{tileSize}, glm::vec2{0, 0}, 20);
-                    vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight - tileSize}, glm::vec3{tileSize}, glm::vec2{1, 0}, 21);
-                    vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight}, glm::vec3{tileSize}, glm::vec2{1, 1}, 22);
-                    vertices.emplace_back(glm::vec3{fx, fy, zHeight}, glm::vec3{tileSize}, glm::vec2{0, 1}, 23);
+                    vertices.emplace_back(glm::vec3{fx, fy, zHeight - tileSize}, glm::vec3{tileSize}, block->faceUVTextureOffsets[BACK], 0);
+                    vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight - tileSize}, glm::vec3{tileSize}, block->faceUVTextureOffsets[BACK], 1);
+                    vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight}, glm::vec3{tileSize}, block->faceUVTextureOffsets[BACK], 2);
+                    vertices.emplace_back(glm::vec3{fx, fy, zHeight}, glm::vec3{tileSize}, block->faceUVTextureOffsets[BACK], 3);
                     n++;
                 }
-
-                // chunkMeshObject->faceUVTextureOffsets[LEFT] = 5;
-                // chunkMeshObject->faceUVTextureOffsets[RIGHT] = 1;
-                // chunkMeshObject->faceUVTextureOffsets[TOP] = 2;
-                // chunkMeshObject->faceUVTextureOffsets[BOTTOM] = 3;
-                // chunkMeshObject->faceUVTextureOffsets[FRONT] = 4;
-                // chunkMeshObject->faceUVTextureOffsets[BACK] = 5;
             }
         }
     }
@@ -266,6 +244,9 @@ void Chunk::generateChunkMesh()
     chunkMeshObject->transform.position.x = 0;
 
     gameObjectPool->appendGameObject(chunkMeshObject);
+    std::cout << "Chunk (" << chunkOffset.x << "," << chunkOffset.y
+              << ") vertices: " << vertices.size()
+              << " triangles: " << indices.size() / 3 << std::endl;
 }
 
 // for (z = 255; z >= -1; z--)
@@ -282,7 +263,7 @@ void Chunk::generateChunkMesh()
 //             if (z > 0)
 //             {
 //                 vertices.emplace_back(glm::vec3{fx, fy, zHeight}, glm::vec3{tileSize}, glm::vec2{0, 0}, 0);
-//                 vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight}, glm::vec3{tileSize}, glm::vec2{1, 0}, 1);
+//                 vertices.emplace_back(glm::vec3{fx + tileSize, fy, zHeight}, glm::vec3{tileSize},  1);
 //                 vertices.emplace_back(glm::vec3{fx + tileSize, fy + tileSize, zHeight}, glm::vec3{tileSize}, glm::vec2{1, 1}, 2);
 //                 vertices.emplace_back(glm::vec3{fx, fy + tileSize, zHeight}, glm::vec3{tileSize}, glm::vec2{0, 1}, 3);
 //             }

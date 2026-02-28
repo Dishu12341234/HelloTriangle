@@ -13,7 +13,7 @@ SRC_DIR   := .
 # =========================
 # Sources
 # =========================
-SRCS := $(wildcard $(SRC_DIR)/*.cxx)
+SRCS := $(shell ls -S $(SRC_DIR)/*.cxx 2>/dev/null)
 OBJS := $(patsubst %.cxx,$(BUILD_DIR)/%.o,$(notdir $(SRCS)))
 
 # =========================

@@ -13,7 +13,6 @@ struct ObjectData {
 layout(push_constant) uniform PushConstantC1
 {
     mat4 model;
-    uint tileIndex[6];
 } pc;
 
 layout(std430, binding = 2) buffer ObjectBuffer {
@@ -22,7 +21,7 @@ layout(std430, binding = 2) buffer ObjectBuffer {
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
-layout(location = 2) in vec2 inTexCoord;
+layout(location = 2) in uint face;
 layout(location = 3) in uint vertexIndex;
 
 
@@ -39,15 +38,19 @@ void main() {
     gl_Position = ubo.proj * ubo.view * scaledModel * vec4(inPosition, 1.0);
     fragColor = inColor;
 
-    // Compute UV offset from tileIndex
-    uint index = pc.tileIndex[vertexIndex / 4];
-    float tilesPerRow = 20.0;
-    float tileSize = 1.0 / tilesPerRow;
+    // Fetch tile index per-face
+    uint index = face;
 
+    // Atlas coordinates
     float x = float(index % 20u);
     float y = float(index / 20u);
 
-    vec2 tileOffset = vec2(x, y) * tileSize;
+    vec2 tileOffset = vec2(x, y) * .05f;
 
-    fragTexCoord =  tileOffset + inTexCoord * tileSize;
+    // Quad UV from vertex index
+    vec2 inTexCoord = vec2(
+        float(vertexIndex == 1 || vertexIndex == 2),
+        float(vertexIndex >= 2)
+    );
+    fragTexCoord = tileOffset + inTexCoord * .05f;
 }

@@ -28,14 +28,13 @@ struct UniformBufferObject
 struct PushConstantC1
 {
     glm::mat4 model;
-    uint32_t tileIndex[6];
 };
 
 struct Vertex
 {
     glm::vec3 pos;
     glm::vec3 color;
-    glm::vec2 texCoord;
+    glm::uint32_t face;
     uint32_t vertexIndex;
     // Telling vulkan how to setup binding
     // Struct 1/2
@@ -71,8 +70,7 @@ namespace std
             hashCombine(vertex.color.g);
             hashCombine(vertex.color.b);
 
-            hashCombine(vertex.texCoord.x);
-            hashCombine(vertex.texCoord.y);
+            hashCombine(vertex.face);
 
             return seed;
         }

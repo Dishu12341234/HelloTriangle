@@ -268,8 +268,8 @@ std::array<VkVertexInputAttributeDescription, 4> Vertex::getAttributeDescription
 
     attributeDescriptions[2].binding = 0;
     attributeDescriptions[2].location = 2;
-    attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-    attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+    attributeDescriptions[2].format = VK_FORMAT_R32_UINT;
+    attributeDescriptions[2].offset = offsetof(Vertex, face);
 
     attributeDescriptions[3].binding = 0;
     attributeDescriptions[3].location = 3;

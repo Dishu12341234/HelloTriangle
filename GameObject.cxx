@@ -66,12 +66,6 @@ void GameObject::drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescr
 
     PushConstantC1 c1;
     c1.model = glm::translate(glm::mat4(1.f), glm::vec3(transform.position));
-    c1.tileIndex[0] = faceUVTextureOffsets[0];
-    c1.tileIndex[1] = faceUVTextureOffsets[1];
-    c1.tileIndex[2] = faceUVTextureOffsets[2];
-    c1.tileIndex[3] = faceUVTextureOffsets[3];
-    c1.tileIndex[4] = faceUVTextureOffsets[4];
-    c1.tileIndex[5] = faceUVTextureOffsets[5];
 
     vkCmdPushConstants(commandBuffer, graphicsPipeline.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstantC1), &c1);
 

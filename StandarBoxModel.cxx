@@ -22,40 +22,40 @@ StandardBoxModel::StandardBoxModel(std::vector<uint32_t> faceUVTextureOffsetsa, 
     vertices.reserve(24);
 
     // +Z FRONT
-    vertices.emplace_back(glm::vec3{-0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 0.f}, 0);
-    vertices.emplace_back(glm::vec3{0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 0.f}, 1);
-    vertices.emplace_back(glm::vec3{0.05f, 0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 1.f}, 2);
-    vertices.emplace_back(glm::vec3{-0.05f, 0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 1.f}, 3);
+    vertices.emplace_back(glm::vec3{-0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[TOP], 0);
+    vertices.emplace_back(glm::vec3{0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[TOP], 1);
+    vertices.emplace_back(glm::vec3{0.05f, 0.05f, 0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[TOP], 2);
+    vertices.emplace_back(glm::vec3{-0.05f, 0.05f, 0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[TOP], 3);
 
     // -Z BACK
-    vertices.emplace_back(glm::vec3{0.05f, -0.05f, -0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 0.f}, 4);
-    vertices.emplace_back(glm::vec3{-0.05f, -0.05f, -0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 0.f}, 5);
-    vertices.emplace_back(glm::vec3{-0.05f, 0.05f, -0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 1.f}, 6);
-    vertices.emplace_back(glm::vec3{0.05f, 0.05f, -0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 1.f}, 7);
+    vertices.emplace_back(glm::vec3{0.05f, -0.05f, -0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[BOTTOM], 0);
+    vertices.emplace_back(glm::vec3{-0.05f, -0.05f, -0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[BOTTOM], 1);
+    vertices.emplace_back(glm::vec3{-0.05f, 0.05f, -0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[BOTTOM], 2);
+    vertices.emplace_back(glm::vec3{0.05f, 0.05f, -0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[BOTTOM], 3);
 
     // -X LEFT
-    vertices.emplace_back(glm::vec3{-0.05f, -0.05f, -0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 0.f}, 8);
-    vertices.emplace_back(glm::vec3{-0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 0.f}, 9);
-    vertices.emplace_back(glm::vec3{-0.05f, 0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 1.f}, 10);
-    vertices.emplace_back(glm::vec3{-0.05f, 0.05f, -0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 1.f}, 11);
+    vertices.emplace_back(glm::vec3{-0.05f, -0.05f, -0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[RIGHT], 0);
+    vertices.emplace_back(glm::vec3{-0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[RIGHT], 1);
+    vertices.emplace_back(glm::vec3{-0.05f, 0.05f, 0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[RIGHT], 2);
+    vertices.emplace_back(glm::vec3{-0.05f, 0.05f, -0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[RIGHT], 3);
 
     // +X RIGHT
-    vertices.emplace_back(glm::vec3{0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 0.f}, 12);
-    vertices.emplace_back(glm::vec3{0.05f, -0.05f, -0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 0.f}, 13);
-    vertices.emplace_back(glm::vec3{0.05f, 0.05f, -0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 1.f}, 14);
-    vertices.emplace_back(glm::vec3{0.05f, 0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 1.f}, 15);
+    vertices.emplace_back(glm::vec3{0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[LEFT], 0);
+    vertices.emplace_back(glm::vec3{0.05f, -0.05f, -0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[LEFT], 1);
+    vertices.emplace_back(glm::vec3{0.05f, 0.05f, -0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[LEFT], 2);
+    vertices.emplace_back(glm::vec3{0.05f, 0.05f, 0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[LEFT], 3);
 
     // +Y TOP
-    vertices.emplace_back(glm::vec3{-0.05f, 0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 0.f}, 16);
-    vertices.emplace_back(glm::vec3{0.05f, 0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 0.f}, 17);
-    vertices.emplace_back(glm::vec3{0.05f, 0.05f, -0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 1.f}, 18);
-    vertices.emplace_back(glm::vec3{-0.05f, 0.05f, -0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 1.f}, 19);
+    vertices.emplace_back(glm::vec3{-0.05f, 0.05f, 0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[FRONT], 0);
+    vertices.emplace_back(glm::vec3{0.05f, 0.05f, 0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[FRONT], 1);
+    vertices.emplace_back(glm::vec3{0.05f, 0.05f, -0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[FRONT], 2);
+    vertices.emplace_back(glm::vec3{-0.05f, 0.05f, -0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[FRONT], 3);
 
     // -Y BOTTOM
-    vertices.emplace_back(glm::vec3{-0.05f, -0.05f, -0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 0.f}, 20);
-    vertices.emplace_back(glm::vec3{0.05f, -0.05f, -0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 0.f}, 21);
-    vertices.emplace_back(glm::vec3{0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{1.f, 1.f}, 22);
-    vertices.emplace_back(glm::vec3{-0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, glm::vec2{0.f, 1.f}, 23);
+    vertices.emplace_back(glm::vec3{-0.05f, -0.05f, -0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[BACK], 0);
+    vertices.emplace_back(glm::vec3{0.05f, -0.05f, -0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[BACK], 1);
+    vertices.emplace_back(glm::vec3{0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[BACK], 2);
+    vertices.emplace_back(glm::vec3{-0.05f, -0.05f, 0.05f}, glm::vec3{0.05f}, faceUVTextureOffsets[BACK], 3);
 
     indices = {
         0, 1, 2, 2, 3, 0,
@@ -80,29 +80,23 @@ void StandardBoxModel::removeFace(Face face)
     struct FaceDef
     {
         glm::vec3 positions[4];
-        glm::vec2 uvs[4] = {
-            {0.f, 0.f},
-            {1.f, 0.f},
-            {1.f, 1.f},
-            {0.f, 1.f}
-        };
     };
 
     const FaceDef faceDefs[6] =
-    {
-        // FRONT (+Z) [0]
-        { { {-s, -s,  s}, { s, -s,  s}, { s,  s,  s}, {-s,  s,  s} } },
-        // BACK  (-Z) [1]
-        { { { s, -s, -s}, {-s, -s, -s}, {-s,  s, -s}, { s,  s, -s} } },
-        // LEFT  (-X) [2]
-        { { {-s, -s, -s}, {-s, -s,  s}, {-s,  s,  s}, {-s,  s, -s} } },
-        // RIGHT (+X) [3]
-        { { { s, -s,  s}, { s, -s, -s}, { s,  s, -s}, { s,  s,  s} } },
-        // TOP   (+Y) [4]
-        { { {-s,  s,  s}, { s,  s,  s}, { s,  s, -s}, {-s,  s, -s} } },
-        // BOTTOM(-Y) [5]
-        { { {-s, -s, -s}, { s, -s, -s}, { s, -s,  s}, {-s, -s,  s} } },
-    };
+        {
+            // FRONT (+Z) [0]
+            {{{-s, -s, s}, {s, -s, s}, {s, s, s}, {-s, s, s}}},
+            // BACK  (-Z) [1]
+            {{{s, -s, -s}, {-s, -s, -s}, {-s, s, -s}, {s, s, -s}}},
+            // LEFT  (-X) [2]
+            {{{-s, -s, -s}, {-s, -s, s}, {-s, s, s}, {-s, s, -s}}},
+            // RIGHT (+X) [3]
+            {{{s, -s, s}, {s, -s, -s}, {s, s, -s}, {s, s, s}}},
+            // TOP   (+Y) [4]
+            {{{-s, s, s}, {s, s, s}, {s, s, -s}, {-s, s, -s}}},
+            // BOTTOM(-Y) [5]
+            {{{-s, -s, -s}, {s, -s, -s}, {s, -s, s}, {-s, -s, s}}},
+        };
 
     vertices.clear();
     indices.clear();
@@ -114,14 +108,14 @@ void StandardBoxModel::removeFace(Face face)
             continue;
 
         uint32_t startIndex = static_cast<uint32_t>(vertices.size());
-        const FaceDef& fd = faceDefs[f];
+        const FaceDef &fd = faceDefs[f];
 
         for (int i = 0; i < 4; i++)
         {
             vertices.emplace_back(
                 fd.positions[i],
                 glm::vec3{s},
-                fd.uvs[i],
+                faceUVTextureOffsets[face],
                 static_cast<uint32_t>(f * 4 + i) // preserve original face slot
             );
         }
