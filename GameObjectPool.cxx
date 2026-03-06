@@ -73,11 +73,12 @@ void GameObjectPool::uploadChunk()
 
     while (uploadIndex < total && uploads < MAX_UPLOADS_PER_FRAME)
     {
-        meshUploader.recordUpload(
-            vkContext,
-            *(gameObjects[uploadIndex]->mesh),
-            uploadCmd,
-            uploadGarbage);
+        if (gameObjects[uploadIndex]->mesh)
+            meshUploader.recordUpload(
+                vkContext,
+                *(gameObjects[uploadIndex]->mesh),
+                uploadCmd,
+                uploadGarbage);
 
         uploadIndex++;
         uploads++;
@@ -102,8 +103,8 @@ void GameObjectPool::drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkD
 {
     for (auto &&[goid, gameObject] : gameObjects)
     {
-        if(gameObject->objectType == ObjectType::StandardBoxModel)
-        gameObject->drawIndexed(commandBuffer, descriptorSets, graphicsPipeline, swapChainExtent, instanceCount, currentFrame);
+        if (gameObject->objectType == ObjectType::StandardBoxModel)
+            gameObject->drawIndexed(commandBuffer, descriptorSets, graphicsPipeline, swapChainExtent, instanceCount, currentFrame);
     }
 
     // auto mesh = gameObjects[1]->mesh;

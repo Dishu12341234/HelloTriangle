@@ -63,7 +63,7 @@ void Camera::updateUBO(UniformBufferObject &UBO,
     glm::vec3 right = glm::normalize(glm::cross(forwardFlat, worldUp));
 
     // ======== Movement ========
-    float speed = 2.0f;
+    float speed = 1.5f;
     float velocity = speed * dt;
 
     if (event.getKeyPressed(GLFW_KEY_W))

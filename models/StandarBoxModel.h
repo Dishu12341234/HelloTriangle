@@ -31,6 +31,7 @@ public:
     void cleanUpResources() override;
     static glm::vec2 tileIndexToUV(uint32_t tileIndex);
     void removeFace(Face face);
+    void addFace(Face face, int atlasIndex);
     ~StandardBoxModel();
 };
 

@@ -8,7 +8,6 @@
 
 GameMeshObject::GameMeshObject()
 {
-    
 }
 
 GameMeshObject::GameMeshObject(std::string modelPath)
@@ -20,7 +19,6 @@ void GameMeshObject::loadMeshModel(std::string modelPath)
 {
     vertices.clear();
     indices.clear();
-
 
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -49,7 +47,6 @@ void GameMeshObject::loadMeshModel(std::string modelPath)
                 attrib.vertices[3 * index.vertex_index + 1],
                 attrib.vertices[3 * index.vertex_index + 2]};
 
-
             vertex.color = {1.0f, 1.0f, 1.0f};
 
             if (uniqueVertices.count(vertex) == 0)
@@ -62,14 +59,31 @@ void GameMeshObject::loadMeshModel(std::string modelPath)
         }
     }
 }
-
 void GameMeshObject::cleanUpResources()
 {
-    vkDestroyBuffer(vkContext.device, indexBuffer, nullptr);
-    vkFreeMemory(vkContext.device, indexBufferMemory, nullptr);
+    if (indexBuffer != VK_NULL_HANDLE)
+    {
+        vkDestroyBuffer(vkContext.device, indexBuffer, nullptr);
+        indexBuffer = VK_NULL_HANDLE;
+    }
 
-    vkDestroyBuffer(vkContext.device, vertexBuffer, nullptr);
-    vkFreeMemory(vkContext.device, vertexBufferMemory, nullptr);
+    if (indexBufferMemory != VK_NULL_HANDLE)
+    {
+        vkFreeMemory(vkContext.device, indexBufferMemory, nullptr);
+        indexBufferMemory = VK_NULL_HANDLE;
+    }
+
+    if (vertexBuffer != VK_NULL_HANDLE)
+    {
+        vkDestroyBuffer(vkContext.device, vertexBuffer, nullptr);
+        vertexBuffer = VK_NULL_HANDLE;
+    }
+
+    if (vertexBufferMemory != VK_NULL_HANDLE)
+    {
+        vkFreeMemory(vkContext.device, vertexBufferMemory, nullptr);
+        vertexBufferMemory = VK_NULL_HANDLE;
+    }
 }
 
 void GameMeshObject::destroyGPU(VkDevice device)
@@ -101,5 +115,4 @@ void GameMeshObject::destroyGPU(VkDevice device)
 
 GameMeshObject::~GameMeshObject()
 {
-    
 }

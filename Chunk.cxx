@@ -66,22 +66,22 @@ void Chunk::generateChunks()
 {
     for (size_t k = 0; k < LAYER_COUNT; k++)
     {
-        // if ((k > 14)&&(k < 16))
-        //     for (size_t i = 0; i < 16; i++)
-        //     {
-        //         for (size_t j = 0; j < 16; j++)
-        //         {
-        //             BlockCoord coord{i + 16 * chunkOffset.x, j + 16 * chunkOffset.y, k};
-        //             uint64_t blockID = gameObjectPool->createNewBoxModelAndAppend({coord.x, coord.y, coord.z}, (k > 10)
-        //                                                                                                            ? std::vector<uint32_t>{0, 1, 1, 1, 1, 1}
-        //                                                                                                            : std::vector<uint32_t>{5, 5, 5, 5, 5, 5})
-        //                                    ->getID();
+        if ((k >= 0) && (k < 50))
+            for (size_t i = 0; i < 16; i++)
+            {
+                for (size_t j = 0; j < 16; j++)
+                {
+                    BlockCoord coord{i + 16 * chunkOffset.x, j + 16 * chunkOffset.y, k};
+                    uint64_t blockID = gameObjectPool->createNewBoxModelAndAppend({coord.x, coord.y, coord.z}, (k > 50)
+                                                                                                                   ? std::vector<uint32_t>{0, 1, 1, 1, 1, 1}
+                                                                                                                   : std::vector<uint32_t>{5, 5, 5, 5, 5, 5})
+                                           ->getID();
 
-        //             // Emplace (won’t overwrite existing)
-        //             auto [it, inserted] = blocks.emplace(coord, blockID);
-        //         }
-        //     }
-        if (k >= 16 && k < 20)
+                    // Emplace (won’t overwrite existing)
+                    auto [it, inserted] = blocks.emplace(coord, blockID);
+                }
+            }
+        if (k >= 50 && k < 64)
         {
             for (size_t i = 0; i < 16; i++)
             {
@@ -92,12 +92,44 @@ void Chunk::generateChunks()
 
                     // Simple pseudo height function
                     float height =
-                        18.0f +
+                        64 +
                         2.0f * sin(worldX * 0.15f) +
                         2.0f * cos(worldY * 0.15f);
 
+                    // Cavity center in world space
+                    float caveCenterX = 16 * chunkOffset.x + 8; // center of chunk in X
+                    float caveCenterY = 16 * chunkOffset.y + 8; // center of chunk in Y
+                    float caveCenterZ = 58;                     // somewhere inside terrain
+
+                    float caveRadius = 5.0f;
+
+                    // Distance from cave center
+                    float dx = worldX - caveCenterX;
+                    float dy = worldY - caveCenterY;
+                    float dz = k - caveCenterZ;
+
+                    float distSq = dx * dx + dy * dy + dz * dz;
+
+                    // If inside sphere → skip block creation (carve cavity)
+                    if (distSq < caveRadius * caveRadius)
+                        continue;
+
                     if (k <= height)
                     {
+                        // ---- CAVITY CARVING ----
+                        float caveCenterX = 16 * chunkOffset.x + 8;
+                        float caveCenterY = 16 * chunkOffset.y + 8;
+                        float caveCenterZ = 50;
+                        float caveRadius = 5.0f;
+
+                        float dx = worldX - caveCenterX;
+                        float dy = worldY - caveCenterY;
+                        float dz = k - caveCenterZ;
+
+                        if (dx * dx + dy * dy + dz * dz < caveRadius * caveRadius)
+                            continue;
+                        // -------------------------
+
                         BlockCoord coord{worldX, worldY, k};
 
                         uint64_t blockID =
@@ -132,7 +164,7 @@ void Chunk::generateChunkMesh()
     chunkMeshObject = gameObjectPool->createNewGameObject();
 
     std::vector<Vertex> vertices;
-
+    vertices.reserve(100000);
     // +Y TOP
     float tileSize = 0.1f;
     int N = 16;
@@ -154,6 +186,9 @@ void Chunk::generateChunkMesh()
                 StandardBoxModel *block = gameObjectPool->getBlock(it->second);
 
                 if (!block)
+                    continue;
+
+                if (!block->mesh)
                     continue;
 
                 if ((block->mesh->indices.size() == 0) || (block->mesh->vertices.size() == 0))
@@ -228,6 +263,7 @@ void Chunk::generateChunkMesh()
     }
 
     std::vector<uint32_t> indices;
+    indices.reserve(150000);
     std::cout << "n: " << n << std::endl;
     for (size_t i = 0; i < n; i++)
     {

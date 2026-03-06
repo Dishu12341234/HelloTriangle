@@ -13,7 +13,7 @@ class Camera
 {
 private:
     VulkanContext vkContext;
-    glm::vec3 cameraPos{2.0f, 2.0f, 0.0f};
+    glm::vec3 cameraPos{2.0f, 2.0f, 6.5f};
 
 public:
     Camera(VulkanContext vkContext);

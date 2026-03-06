@@ -79,7 +79,6 @@ uint32_t GameObject::getID()
 
 void GameObject::cleanUpResources()
 {
-    this->mesh->cleanUpResources();
     delete mesh;
     mesh = nullptr;
 }
