@@ -7,12 +7,14 @@
 #include "Textures.hpp"
 #include "GraphicsPipeline.h"
 #include "DebugPipeline.h"
+#include "RayPipeline.h"
 #include "GameMeshObject.h"
 #include "MeshUploader.h"
 #include "GameObjectPool.h"
-#include "Camera.h"
 #include "Terrain.h"
 #include "Event.h"
+
+class Player;
 
 class HelloTriangleApplication
 {
@@ -20,7 +22,7 @@ private:
     // =====GAME STATES=====
     bool menu = false;
     Event *event;
-    Camera *camera;
+    std::unique_ptr<Player> player;
     Terrain *terrain;
     bool keyStateA = false;
 
@@ -138,6 +140,7 @@ private:
 
     u_GraphicsPipeline graphicsPipeline;
     DebugPipeline debugPipeline;;
+    RayPipeline rayPipeline;;
 
     void initGameObjects();
 

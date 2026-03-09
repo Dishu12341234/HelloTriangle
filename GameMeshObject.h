@@ -32,6 +32,7 @@ private:
     friend class Chunk;
     friend class Terrain;
     friend class StandardBoxModel;
+    friend class Camera;
 
 public:
     GameMeshObject();

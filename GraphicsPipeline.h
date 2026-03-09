@@ -32,10 +32,10 @@ struct PushConstantC1
 
 struct Vertex
 {
-    glm::vec3 pos;
-    glm::vec3 color;
-    glm::uint32_t face;
-    uint32_t vertexIndex;
+    glm::vec3 pos{};
+    glm::vec3 color{};
+    glm::uint32_t face{};
+    uint32_t vertexIndex{};
     // Telling vulkan how to setup binding
     // Struct 1/2
     static VkVertexInputBindingDescription getBindingDescription();
@@ -87,6 +87,7 @@ private:
     VkDescriptorSetLayout *descriptorSetLayout;
     VkSampleCountFlagBits msaaSamples;
     friend class DebugPipeline;
+    friend class RayPipeline;
 
 public:
     VkPipelineLayout pipelineLayout;

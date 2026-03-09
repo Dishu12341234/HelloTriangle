@@ -1,4 +1,5 @@
 #include "HelloTriangleApplication.hpp"
+#include "Player.h"
 
 void HelloTriangleApplication::mainLoop()
 {
@@ -49,8 +50,11 @@ void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer commandBuffer
     // gameObjectPool.drawIndexed(commandBuffer, descriptorSets, graphicsPipeline, swapChainExtent, 1, currentFrame);
 
     // ---- Debug / Terrain ----
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, debugPipeline.graphicsPipeline);
-    terrain->drawChunks(commandBuffer, descriptorSets, debugPipeline, swapChainExtent, 1, currentFrame);
+    // vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, debugPipeline.graphicsPipeline);
+    // terrain->drawChunks(commandBuffer, descriptorSets, debugPipeline, swapChainExtent, 1, currentFrame);
+
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, rayPipeline.graphicsPipeline);
+    player->camera->drawRays(commandBuffer, descriptorSets, rayPipeline, swapChainExtent, 1, currentFrame);
 
     vkCmdEndRenderPass(commandBuffer);
 
@@ -136,7 +140,6 @@ void HelloTriangleApplication::cleanup()
     // terrain->cleanUp();
 
     delete event;
-    delete camera;
     delete terrain;
 
     vkDestroyBuffer(device, indexBuffer, nullptr);
@@ -171,6 +174,7 @@ void HelloTriangleApplication::cleanup()
 
     graphicsPipeline.destroyPipelineLayout();
     debugPipeline.destroyPipelineLayout();
+    rayPipeline.destroyPipelineLayout();
     vkDestroyRenderPass(device, renderPass, nullptr);
 
     for (auto imageView : swapChainImageViews)

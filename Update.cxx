@@ -2,6 +2,7 @@
 #include "GameMeshObject.h"
 #include "models/StandarBoxModel.h"
 #include "Chunk.h"
+#include "Player.h"
 #include <cstdlib>
 #include <cstring>
 #include <memory>
@@ -19,7 +20,7 @@ void HelloTriangleApplication::initGameObjects()
     context.presentQueue = presentQueue;
     context.commandPool = commandPool;
 
-    camera = new Camera(context);
+    player = std::make_unique<Player>(context, &gameObjectPool);
     gameObjectPool.init(context);
 
     StandardBoxModel *testBlock = gameObjectPool.createNewBoxModelAndAppend({40, 30, 0}, {0, 1, 1, 1, 1, 1});
@@ -72,9 +73,9 @@ void HelloTriangleApplication::updateUniformBuffer(uint32_t currentImage)
 
     rWasPressed = rPressedNow;
 
-    camera->updateUBO(ubo, swapChainExtent, *event);
+    player->updateUBO(ubo, swapChainExtent, *event);
 
-    glm::vec3 coordinates = camera->gePositionInWorldCoords();
+    glm::vec3 coordinates = player->camera->gePositionInWorldCoords();
     std::cout << "(x,y,z):(" << coordinates.x << "," << coordinates.y << "," << coordinates.z << ")" << std::endl;
 
     memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
