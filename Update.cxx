@@ -34,6 +34,7 @@ void HelloTriangleApplication::initGameObjects()
 
     terrain = new Terrain(context, gameObjectPool);
     terrain->loadChunks();
+    gameObjectPool.terrain = terrain;
 
     // Chunk c(&gameObjectPool);
     // c.setOffset({0, 0});

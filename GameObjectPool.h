@@ -12,6 +12,9 @@
 #include "GameObject.h"
 #include "models/StandarBoxModel.h"
 
+class Terrain;
+struct BlockCoord;
+
 struct alignas(16) ObjectData
 {
     glm::mat4 model;
@@ -25,6 +28,7 @@ private:
     bool uploadInProgress = false;
     VkCommandBuffer uploadCmd = VK_NULL_HANDLE;
     MeshUploader meshUploader;
+    Terrain *terrain;
 
     friend class HelloTriangleApplication;
 
@@ -49,6 +53,9 @@ public:
     void uploadChunk();
     void drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkDescriptorSet> &descriptorSets, u_GraphicsPipeline &graphicsPipeline, VkExtent2D &swapChainExtent, uint64_t instanceCount, uint32_t &currentFrame);
     void reuploadAll();
+
+    StandardBoxModel* getBlockFromWorldCoords(BlockCoord);
+
     void cleanUpResources();
     ~GameObjectPool();
 };

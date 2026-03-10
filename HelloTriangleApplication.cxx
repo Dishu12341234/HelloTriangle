@@ -1,6 +1,7 @@
 #include "HelloTriangleApplication.hpp"
 #include "Player.h"
 
+
 void HelloTriangleApplication::mainLoop()
 {
     while (!glfwWindowShouldClose(_window))
@@ -50,8 +51,8 @@ void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer commandBuffer
     // gameObjectPool.drawIndexed(commandBuffer, descriptorSets, graphicsPipeline, swapChainExtent, 1, currentFrame);
 
     // ---- Debug / Terrain ----
-    // vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, debugPipeline.graphicsPipeline);
-    // terrain->drawChunks(commandBuffer, descriptorSets, debugPipeline, swapChainExtent, 1, currentFrame);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, debugPipeline.graphicsPipeline);
+    terrain->drawChunks(commandBuffer, descriptorSets, debugPipeline, swapChainExtent, 1, currentFrame);
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, rayPipeline.graphicsPipeline);
     player->camera->drawRays(commandBuffer, descriptorSets, rayPipeline, swapChainExtent, 1, currentFrame);

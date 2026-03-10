@@ -1,5 +1,6 @@
 #include "GameObjectPool.h"
-
+#include "Chunk.h"
+#include "Terrain.h"
 #include <thread>
 
 GameObjectPool::GameObjectPool()
@@ -129,6 +130,14 @@ void GameObjectPool::drawIndexed(VkCommandBuffer &commandBuffer, std::vector<VkD
 
 void GameObjectPool::reuploadAll()
 {
+}
+
+StandardBoxModel* GameObjectPool::getBlockFromWorldCoords(BlockCoord coords)
+{
+    if(!terrain)
+        return nullptr;
+
+    return terrain->getBlockFromWorld(coords);
 }
 
 void GameObjectPool::cleanUpResources()

@@ -15,8 +15,11 @@ class Camera
 private:
     VulkanContext vkContext;
     glm::vec3 cameraPos{2.0f, 2.0f, 6.5f};
+    float pitch;
+    float yaw;
     GameObjectPool &gameObjectPool;
     GameObject *ray = nullptr;
+    glm::vec3 forward;
 
 public:
     Camera(VulkanContext vkContext, GameObjectPool &gop);
@@ -24,7 +27,7 @@ public:
     glm::vec3 gePositionInWorldCoords();
 
     void drawRays(VkCommandBuffer &commandBuffer, std::vector<VkDescriptorSet> &descriptorSets, u_GraphicsPipeline &graphicsPipeline, VkExtent2D &swapChainExtent, uint64_t instanceCount, uint32_t &currentFrame);
-
+    bool isVoxelSolid(int x, int y, int z);
     ~Camera();
 };
 

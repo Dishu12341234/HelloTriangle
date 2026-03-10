@@ -74,12 +74,12 @@ RESET  := \033[0m
 all: $(BUILD_DIR)
 ifeq ($(UNAME_S),Darwin)
 	@echo -e "$(YELLOW)Building for macOS...$(RESET)"
-	$(MAKE) $(MAC_EXEC)
+	$(MAKE) -j4 $(MAC_EXEC)
 	@echo -e "$(GREEN)Running $(BGMAGENTA)$(MAC_EXEC)$(RESET)"
 	./$(MAC_EXEC)
 else
 	@echo -e "$(YELLOW)Building for Linux...$(RESET)"
-	$(MAKE) $(LINUX_EXEC)
+	$(MAKE) -j4 $(LINUX_EXEC)
 endif
 
 # =========================
@@ -90,17 +90,52 @@ $(MAC_EXEC): $(OBJS)
 	$(CXX) $(OBJS) $(MAC_CXXFLAGS) $(MAC_LDFLAGS) -o $@
 
 $(LINUX_EXEC): $(OBJS)
-	@echo -e "$(GREEN)Linking $(BGMAGENTA)$@$(RESET)"
-	$(CXX) $(OBJS) $(LINUX_CXXFLAGS) $(LINUX_LDFLAGS) -o $@
+	@printf "$(GREEN)Linking $(BGMAGENTA)$@$(RESET)\n"
+	@$(CXX) $(OBJS) $(LINUX_CXXFLAGS) $(LINUX_LDFLAGS) -o $@
+	@TOTAL_SRC=$$(find $(SRC_DIR) -name '*.cxx' | wc -l); \
+	TOTAL_OBJ=$$(find $(BUILD_DIR) -name '*.o' | wc -l); \
+	SRC_BYTES=$$(find $(SRC_DIR) -name '*.cxx' -exec wc -c {} + | tail -1 | awk '{print $$1}'); \
+	OBJ_BYTES=$$(find $(BUILD_DIR) -name '*.o' -exec wc -c {} + | tail -1 | awk '{print $$1}'); \
+	EXEC_BYTES=$$(wc -c < $@); \
+	printf "\n"; \
+	printf "$(GREEN)╔════════════════════════════════════════════════╗$(RESET)\n"; \
+	printf "$(GREEN)║           Build Summary             		 ║$(RESET)\n"; \
+	printf "$(GREEN)╠════════════════════════════════════════════════╣$(RESET)\n"; \
+	printf "$(GREEN)║$(RESET)  📁 Sources compiled : $$TOTAL_SRC files\n"; \
+	printf "$(GREEN)║$(RESET)  📦 Objects produced : $$TOTAL_OBJ files\n"; \
+	printf "$(GREEN)║$(RESET)  📄 Total source size : $$SRC_BYTES bytes\n"; \
+	printf "$(GREEN)║$(RESET)  🧱 Total object size : $$OBJ_BYTES bytes\n"; \
+	printf "$(GREEN)║$(RESET)  🚀 Executable size   : $$EXEC_BYTES bytes\n"; \
+	printf "$(GREEN)║$(RESET)  🎯 Output            : $@\n"; \
+	printf "$(GREEN)╚════════════════════════════════════════════════╝$(RESET)\n"; \
+	printf "\n"
 
 # Object compilation
 $(BUILD_DIR)/%.o: %.cxx
 	@mkdir -p $(BUILD_DIR)
 	@echo -e "$(YELLOW)Compiling $(BGMAGENTA)$<$(RESET)"
 ifeq ($(UNAME_S),Darwin)
-	$(CXX) $(MAC_CXXFLAGS) -c $< -o $@
+	@START=$$(date +%s%3N); \
+	$(CXX) $(MAC_CXXFLAGS) -c $< -o $@; \
+	END=$$(date +%s%3N); \
+	SIZE_IN=$$(wc -c < $<); \
+	SIZE_OUT=$$(wc -c < $@); \
+	echo -e "  $(GREEN)✔  $<$(RESET)"; \
+	echo -e "     ⏱  Time   : $$((END - START))ms"; \
+	echo -e "     📄 Source : $$SIZE_IN bytes"; \
+	echo -e "     📦 Object : $$SIZE_OUT bytes"; \
+	echo ""
 else
-	$(CXX) $(LINUX_CXXFLAGS) -c $< -o $@
+	@START=$$(date +%s%3N); \
+	$(CXX) $(LINUX_CXXFLAGS) -c $< -o $@; \
+	END=$$(date +%s%3N); \
+	SIZE_IN=$$(wc -c < $<); \
+	SIZE_OUT=$$(wc -c < $@); \
+	echo -e "  $(GREEN)✔  $<$(RESET)"; \
+	echo -e "     ⏱  Time   : $$((END - START))ms"; \
+	echo -e "     📄 Source : $$SIZE_IN bytes"; \
+	echo -e "     📦 Object : $$SIZE_OUT bytes"; \
+	echo ""
 endif
 
 -include $(BUILD_DIR)/*.d

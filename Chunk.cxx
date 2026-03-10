@@ -72,10 +72,14 @@ void Chunk::generateChunks()
                 for (size_t j = 0; j < 16; j++)
                 {
                     BlockCoord coord{i + 16 * chunkOffset.x, j + 16 * chunkOffset.y, k};
-                    uint64_t blockID = gameObjectPool->createNewBoxModelAndAppend({coord.x, coord.y, coord.z}, (k > 50)
-                                                                                                                   ? std::vector<uint32_t>{0, 1, 1, 1, 1, 1}
-                                                                                                                   : std::vector<uint32_t>{5, 5, 5, 5, 5, 5})
-                                           ->getID();
+                    auto block = gameObjectPool->createNewBoxModelAndAppend({coord.x, coord.y, coord.z}, (k > 50)
+                                                                                                             ? std::vector<uint32_t>{0, 1, 1, 1, 1, 1}
+                                                                                                             : std::vector<uint32_t>{5, 5, 5, 5, 5, 5});
+                    uint64_t blockID = block->getID();
+                    if (k > 50)
+                        block->blockType = GRASS;
+                    else
+                        block->blockType = STONE;
 
                     // Emplace (won’t overwrite existing)
                     auto [it, inserted] = blocks.emplace(coord, blockID);
@@ -131,13 +135,14 @@ void Chunk::generateChunks()
                         // -------------------------
 
                         BlockCoord coord{worldX, worldY, k};
-
-                        uint64_t blockID =
+                        auto block =
                             gameObjectPool
                                 ->createNewBoxModelAndAppend(
                                     {coord.x, coord.y, coord.z},
-                                    {0, 1, 1, 1, 1, 1})
-                                ->getID();
+                                    {0, 1, 1, 1, 1, 1});
+                        block->blockType = GRASS;
+                        uint64_t blockID =
+                            block->getID();
 
                         blocks.emplace(coord, blockID);
                     }
@@ -191,7 +196,7 @@ void Chunk::generateChunkMesh()
                 if (!block->mesh)
                     continue;
 
-                if ((block->mesh->indices.size() == 0) || (block->mesh->vertices.size() == 0))
+                if ((block->mesh->indices.size() == 0) || (block->mesh->vertices.size() == 0) || block->blockType == AIR)
                     continue;
 
                 zHeight = z * tileSize + .4226;

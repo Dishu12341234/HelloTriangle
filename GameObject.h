@@ -16,7 +16,9 @@ struct d_Rect3D // dimessions_rect
 
 struct Transform
 {
-    glm::vec3 position;
+    glm::vec3 position{};
+    glm::vec3 rotationAngle{};
+    glm::mat4 rotationMatrix{};
 };
 
 enum Face
@@ -48,6 +50,7 @@ private:
 
     friend class StandardBoxModel;
     friend class GameObjectPool;
+    friend class Camera;
 
 public:
     uint32_t faceUVTextureOffsets[6] = {2, 2, 2, 2, 2, 2};
@@ -72,4 +75,4 @@ public:
     virtual ~GameObject() = default;
 };
 
-#endif
+#endif 
