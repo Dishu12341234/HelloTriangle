@@ -32,6 +32,7 @@ private:
 
     friend class Chunk;
     friend class Camera;
+    friend struct Ray;
 
     uint16_t blockType = AIR;
 

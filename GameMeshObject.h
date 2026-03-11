@@ -33,6 +33,7 @@ private:
     friend class Terrain;
     friend class StandardBoxModel;
     friend class Camera;
+    friend class Ray;
 
 public:
     GameMeshObject();

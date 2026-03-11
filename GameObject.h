@@ -51,6 +51,7 @@ private:
     friend class StandardBoxModel;
     friend class GameObjectPool;
     friend class Camera;
+    friend struct Ray;
 
 public:
     uint32_t faceUVTextureOffsets[6] = {2, 2, 2, 2, 2, 2};
