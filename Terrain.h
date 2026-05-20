@@ -1,7 +1,17 @@
 #ifndef TERRAIN_H
 #define TERRAIN_H
 #include "GameObjectPool.h"
+<<<<<<< HEAD
 #include "Chunk.h"
+=======
+#include <atomic>
+#include <cstdint>
+#include <mutex>
+#include <set>
+#include <thread>
+#include <vector>
+#define RENDER_DISTANCE 3
+>>>>>>> 196e0be (=font rendering)
 
 #define RENDER_DISTANCE 1
 

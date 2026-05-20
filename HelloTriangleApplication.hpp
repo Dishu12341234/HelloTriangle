@@ -1,4 +1,5 @@
 #pragma once
+<<<<<<< HEAD
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <vector>
@@ -15,12 +16,37 @@
 #include "Event.h"
 
 
+=======
+#include "FontRenderPipeline.h"
+#include "Structs.h"
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#define GLFW_INCLUDE_VULKAN
+#include "2DTextureArray.h"
+#include "Fonts.h"
+#include "GameObjectPool.h"
+#include "GraphicsPipeline.h"
+#include "RayGraphicsPipeline.h"
+#include "Textures.hpp"
+#include "UI.h"
+#include "UIRenderPipeline.h"
+#include "uiTexture.h"
+#include <GLFW/glfw3.h>
+#include <chrono>
+#include <memory>
+#include <optional>
+#include <vector>
+class Event;
+class Inventory;
+#define NUM_DESCRIPTOR_COUNT_FOR_UI_TEXTURES 16
+>>>>>>> 196e0be (=font rendering)
 
 class Player;
 
 class HelloTriangleApplication
 {
 private:
+<<<<<<< HEAD
     // =====GAME STATES=====
     bool menu = false;
     Event *event;
@@ -30,6 +56,20 @@ private:
 
     const int MAX_FRAMES_IN_FLIGHT = 2;
     std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
+=======
+  FT_Library ft;
+
+  const int MAX_FRAMES_IN_FLIGHT = 3;
+  std::chrono::high_resolution_clock::time_point startTime =
+      std::chrono::high_resolution_clock::now();
+
+  std::unique_ptr<Terrain> terrain;
+  std::optional<UI> ui;
+  std::unique_ptr<Inventory> inventory;
+  std::unique_ptr<UIComponents> Crosshair;
+  std::unique_ptr<UIComponents> Heart;
+  std::unique_ptr<Fonts> font;
+>>>>>>> 196e0be (=font rendering)
 
     VkInstance instance;
     MeshUploader meshUploader;
@@ -174,9 +214,20 @@ private:
     void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBufferm, VkDeviceSize size);
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
+<<<<<<< HEAD
     void createCommandBuffers();
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+=======
+  FontRenderPipeline fontRenderPipeline;
+
+  void initGameObjects();
+
+  void initFontLib();
+
+  void createFramebuffers();
+  void createCommandPool();
+>>>>>>> 196e0be (=font rendering)
 
     void createSyncObject();
 

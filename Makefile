@@ -35,7 +35,13 @@ COMMON_CXXFLAGS := -std=c++2b -Wall -g -O1 \
 	-fsanitize=address -fno-omit-frame-pointer \
 	-MMD -MP \
 	-lprofiler \
+<<<<<<< HEAD
 	-I/usr/include
+=======
+	-I/usr/include \
+	-I/usr/include/freetype2 \
+	-fno-inline -rdynamic
+>>>>>>> 196e0be (=font rendering)
 
 MAC_CXXFLAGS := $(COMMON_CXXFLAGS) \
 	-I$(MAC_VULKAN_SDK)/macOS/include
@@ -43,7 +49,11 @@ MAC_CXXFLAGS := $(COMMON_CXXFLAGS) \
 LINUX_CXXFLAGS := $(COMMON_CXXFLAGS) \
 	-I$(LINUX_VULKAN_SDK)/include
 
+<<<<<<< HEAD
 COMMON_LDFLAGS := -L/opt/homebrew/lib -L./lib -lglfw
+=======
+COMMON_LDFLAGS := -L/opt/homebrew/lib -L./lib -lglfw -lfmt -lfreetype
+>>>>>>> 196e0be (=font rendering)
 
 MAC_LDFLAGS := $(COMMON_LDFLAGS) \
 	-L$(MAC_VULKAN_SDK)/macOS/lib \

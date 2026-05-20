@@ -80,6 +80,7 @@ namespace std
 class u_GraphicsPipeline
 {
 private:
+<<<<<<< HEAD
     VkDevice device;
     int height, width;
     VkExtent2D swapChainExtent;
@@ -88,6 +89,18 @@ private:
     VkSampleCountFlagBits msaaSamples;
     friend class DebugPipeline;
     friend class RayPipeline;
+=======
+  VkDevice device;
+  int height, width;
+  VkExtent2D swapChainExtent;
+  VkRenderPass renderPass;
+  VkDescriptorSetLayout *descriptorSetLayout;
+  VkSampleCountFlagBits msaaSamples;
+
+  friend class RayGraphicsPipeline;
+  friend class UIRenderPipeline;
+  friend class FontRenderPipeline;
+>>>>>>> 196e0be (=font rendering)
 
 public:
     VkPipelineLayout pipelineLayout;

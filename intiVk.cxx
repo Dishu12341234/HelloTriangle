@@ -177,9 +177,22 @@ void HelloTriangleApplication::createInstance()
     std::vector<const char *> requiredExtensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
     requiredExtensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 
+<<<<<<< HEAD
     createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
     createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
     createInfo.ppEnabledExtensionNames = requiredExtensions.data();
+=======
+  uiRenderPipeline.u_PassGraphicsPipelineCreateInfo(createInfo);
+  uiRenderPipeline.createGraphicsPipeline();
+
+  fontRenderPipeline.u_PassGraphicsPipelineCreateInfo(createInfo);
+  fontRenderPipeline.createGraphicsPipeline();
+
+  u_TexturePassInfo texturePassInfo{};
+  texturePassInfo.device = device;
+  texturePassInfo.physicalDevice = physicalDevice;
+  texturePassInfo.swapChainExtent = swapChainExtent;
+>>>>>>> 196e0be (=font rendering)
 
     // --- Create instance ---
     if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
@@ -187,6 +200,7 @@ void HelloTriangleApplication::createInstance()
         throw std::runtime_error("failed to create instance!");
     }
 
+<<<<<<< HEAD
     // --- Print available extensions ---
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -198,6 +212,185 @@ void HelloTriangleApplication::createInstance()
     {
         std::cout << '\t' << extension.extensionName << '\n';
     }
+=======
+  uiTexturePaths[4] = "/home/divyansh/MinecraftClone/textures/corrupt.png";
+
+  for (size_t i = 0; i < NUM_DESCRIPTOR_COUNT_FOR_UI_TEXTURES; i++) {
+    uiTextures.emplace_back();
+  }
+
+  texture.passTextureCreateInfo(texturePassInfo);
+  for (size_t i = 0; i < NUM_DESCRIPTOR_COUNT_FOR_UI_TEXTURES; i++) {
+    uiTextures.at(i).passTextureCreateInfo(texturePassInfo);
+  }
+
+  createColorResources();
+  createDepthResources();
+  createFramebuffers();
+  createCommandPool();
+
+  static VulkanContext context;
+
+  context.device = device;
+  context.physicalDevice = physicalDevice;
+  context.graphicsQueue = graphicsQueue;
+  context.instance = instance;
+  context.presentQueue = presentQueue;
+  context.commandPool = commandPool;
+
+  texturePassInfo.graphicsQueue = graphicsQueue;
+  texturePassInfo.renderPass = renderPass;
+  texturePassInfo.commandPool = commandPool;
+  texturePassInfo.height = HEIGHT;
+  texturePassInfo.width = WIDTH;
+  texturePassInfo.texturePath = TEXTURE_PATH;
+
+  this->blockTextureArray2D = std::make_unique<TextureArray2D>(context);
+  this->blockTextureArray2D->passInfo(texturePassInfo);
+
+  this->blockTextureArray2D->setTexturePaths(
+      19, "/home/divyansh/MinecraftClone/textures/corrupt_blk.png");
+
+  this->blockTextureArray2D->setTexturePaths(
+      0, "/home/divyansh/MinecraftClone/textures/grass_top.png");
+  this->blockTextureArray2D->setTexturePaths(
+      1, "/home/divyansh/MinecraftClone/textures/grass_side.png");
+  this->blockTextureArray2D->setTexturePaths(
+      2, "/home/divyansh/MinecraftClone/textures/debug_blk.png");
+  this->blockTextureArray2D->setTexturePaths(
+      3, "/home/divyansh/MinecraftClone/textures/wood.png");
+  this->blockTextureArray2D->setTexturePaths(
+      4, "/home/divyansh/MinecraftClone/textures/leaf.png");
+  this->blockTextureArray2D->setTexturePaths(
+      5, "/home/divyansh/MinecraftClone/textures/stone.png");
+  this->blockTextureArray2D->setTexturePaths(
+      6, "/home/divyansh/MinecraftClone/textures/bedrock.png");
+
+  blockTextureArray2D->allocateStorageForTextures();
+  blockTextureArray2D->createBlkTextureStagingBuffer();
+  blockTextureArray2D->createBlkTextureArrayImage();
+  blockTextureArray2D->allocateBlkTextureArrayMemory();
+  blockTextureArray2D
+      ->transitionBlkTextureArrayImageLayout();    // UNDEFINED -> TRANSFER_DST
+  blockTextureArray2D->uploadBlkTexturesToArray(); // copy pixels
+  blockTextureArray2D
+      ->transitionBlkTextureArrayToShaderRead(); // TRANSFER_DST -> SHADER_READ
+  blockTextureArray2D->createBlkTextureArrayImageView();
+  blockTextureArray2D->createBlkArraySampler();
+  texture.passTextureCreateInfo(texturePassInfo);
+
+  uiTexturePaths[0] = "/home/divyansh/MinecraftClone/textures/inventory.png";
+  uiTexturePaths[1] = "/home/divyansh/MinecraftClone/textures/crosshair.png";
+  uiTexturePaths[2] = "/home/divyansh/MinecraftClone/textures/heart.png";
+  uiTexturePaths[3] =
+      "/home/divyansh/MinecraftClone/textures/inventorySelectionMask.png";
+  for (size_t i = 0; i < NUM_DESCRIPTOR_COUNT_FOR_UI_TEXTURES; i++) {
+    texturePassInfo.texturePath = uiTexturePaths[i];
+    uiTextures.at(i).passTextureCreateInfo(texturePassInfo);
+  }
+
+  loadModel();
+  // createVertexBuffer();
+  // createIndexBuffer();
+  initGameObjects();
+  createUniformBuffers();
+  createDescriptorPool();
+
+  std::cout << "Creating Texture..." << std::endl;
+  texture.createTextureImage();
+  texture.createTextureView();
+  texture.createTextureSampler();
+  for (size_t i = 0; i < NUM_DESCRIPTOR_COUNT_FOR_UI_TEXTURES; i++) {
+    uiTextures.at(i).createTextureImage();
+    uiTextures.at(i).createTextureView();
+    uiTextures.at(i).createTextureSampler();
+  }
+
+  initFontLib();
+  texturePassInfo.texturePath =
+      "/home/divyansh/MinecraftClone/textures/inventory.png";
+  font->texture.passTextureCreateInfo(texturePassInfo);
+  font->createTextureImage();
+  font->buildTextMesh("amnesia", .1f);
+  font->texture.createTextureSampler();
+
+  createDescriptorSets();
+  createCommandBuffers();
+  createSyncObject();
+}
+
+void HelloTriangleApplication::createInstance() {
+  std::cout << "Creating Vulkan Instance..." << std::endl;
+  if (enableValidationLayers && !checkValidationLayerSupport()) {
+    throw std::runtime_error("Validation layers requested, but not available");
+  }
+
+  if (enableValidationLayers) {
+    std::cout << "Validation layers enabled" << std::endl;
+  }
+
+  // --- Application info ---
+  VkApplicationInfo appInfo{};
+  appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+  appInfo.pApplicationName = "Hello Triangle";
+  appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+  appInfo.pEngineName = "No Engine";
+  appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+  appInfo.apiVersion = VK_API_VERSION_1_3; // Use 1.1 for MoltenVK
+
+  // --- Instance create info ---
+  VkInstanceCreateInfo createInfo{};
+  createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+  createInfo.pApplicationInfo = &appInfo;
+
+  // --- Validation layers ---
+  if (enableValidationLayers) {
+    createInfo.enabledLayerCount =
+        static_cast<uint32_t>(validationLayers.size());
+    createInfo.ppEnabledLayerNames = validationLayers.data();
+  } else {
+    createInfo.enabledLayerCount = 0;
+    createInfo.ppEnabledLayerNames = nullptr;
+  }
+
+  // --- Required extensions ---
+  uint32_t glfwExtensionCount = 0;
+  const char **glfwExtensions =
+      glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+  std::vector<const char *> requiredExtensions(
+      glfwExtensions, glfwExtensions + glfwExtensionCount);
+  requiredExtensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+  requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
+  createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+  createInfo.enabledExtensionCount =
+      static_cast<uint32_t>(requiredExtensions.size());
+  createInfo.ppEnabledExtensionNames = requiredExtensions.data();
+
+  VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+  if (enableValidationLayers) {
+    populateDebugMessengerCreateInfo(debugCreateInfo);
+    createInfo.pNext =
+        &debugCreateInfo; // catches errors during instance create/destroy
+  }
+
+  // --- Create instance ---
+  if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+    throw std::runtime_error("failed to create instance!");
+  }
+
+  // --- Print available extensions ---
+  uint32_t extensionCount = 0;
+  vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+  std::vector<VkExtensionProperties> extensions(extensionCount);
+  vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount,
+                                         extensions.data());
+
+  std::cout << "available extensions:\n";
+  for (const auto &extension : extensions) {
+    std::cout << '\t' << extension.extensionName << '\n';
+  }
+>>>>>>> 196e0be (=font rendering)
 }
 
 // finding if VL_LAYERS_KHRONOS_validation is there or not
@@ -590,6 +783,7 @@ void HelloTriangleApplication::createSwapChain()
     // Metal limits the max to 3 so only +1 one is allowed while NVIDIA and AMD has no limits
     uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
 
+<<<<<<< HEAD
     // Check to not exeed the maximum
     // 0 is a special number meaning that there is not upper limit
     if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
@@ -600,6 +794,151 @@ void HelloTriangleApplication::createSwapChain()
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     createInfo.surface = surface; // surface
+=======
+  // creating the actul VBO and setting it up so the it is the destionation of
+  // the transfer source TX
+  createBuffer(
+      bufferSize,
+      VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
+
+  // but we still have to copy the memory contents manully
+  copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+  vkDestroyBuffer(device, stagingBuffer, nullptr);
+  vkFreeMemory(device, stagingBufferMemory, nullptr);
+}
+
+void HelloTriangleApplication::createIndexBuffer() {
+  std::cout << "Creating Index Buffer..." << std::endl;
+
+  VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+  VkBuffer stagingBuffer;
+  VkDeviceMemory stagingBufferMemory;
+
+  createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                   VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+               stagingBuffer, stagingBufferMemory);
+
+  void *data;
+  vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+  memcpy(data, indices.data(), (size_t)bufferSize);
+  vkUnmapMemory(device, stagingBufferMemory);
+
+  createBuffer(
+      bufferSize,
+      VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+
+  copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+  vkDestroyBuffer(device, stagingBuffer, nullptr);
+  vkFreeMemory(device, stagingBufferMemory, nullptr);
+}
+
+void HelloTriangleApplication::createUniformBuffers() {
+  std::cout << "Creating Uniform Buffers..." << std::endl;
+
+  VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+
+  uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+  uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+  uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT); // like 'void *data;'
+
+  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                 uniformBuffers[i], uniformBuffersMemory[i]);
+    vkMapMemory(device, uniformBuffersMemory[i], 0, bufferSize, 0,
+                &uniformBuffersMapped[i]);
+  }
+}
+
+void HelloTriangleApplication::createDescriptorPool() {
+  std::cout << "Creating Descriptor Pool..." << std::endl;
+
+  std::array<VkDescriptorPoolSize, 4> poolSizes{};
+  poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+  poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  poolSizes[1].descriptorCount = MAX_FRAMES_IN_FLIGHT * (2 + 16);
+
+  poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  poolSizes[2].descriptorCount =
+      NUM_DESCRIPTOR_COUNT_FOR_UI_TEXTURES *
+      static_cast<uint32_t>(
+          MAX_FRAMES_IN_FLIGHT); // uiTexturesBinding.descriptorCount = 16;
+                                 //
+
+  poolSizes[3].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  poolSizes[3].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+  VkDescriptorPoolCreateInfo poolInfo{};
+  poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+  poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+  poolInfo.pPoolSizes = poolSizes.data();
+  poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+  if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) !=
+      VK_SUCCESS) {
+    throw std::runtime_error("failed to create descriptor pool!");
+  }
+}
+
+void HelloTriangleApplication::createDescriptorSets() {
+  std::cout << "Creating Descriptor Sets..." << std::endl;
+
+  std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT,
+                                             descriptorSetLayout);
+  VkDescriptorSetAllocateInfo allocInfo{};
+  allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+  allocInfo.descriptorPool = descriptorPool;
+  allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+  allocInfo.pSetLayouts = layouts.data();
+
+  descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+  if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) !=
+      VK_SUCCESS) {
+    throw std::runtime_error("failed to allocate descriptor sets!");
+  }
+
+  updateDescriptorSets(texture);
+}
+
+void HelloTriangleApplication::updateDescriptorSets(u_Texture &texture) {
+
+  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    VkDescriptorBufferInfo bufferInfo{};
+    bufferInfo.buffer = uniformBuffers[i];
+    bufferInfo.offset = 0;
+    bufferInfo.range = sizeof(UniformBufferObject);
+
+    // image info for UI textures
+    VkDescriptorImageInfo imageInfo{};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView = blockTextureArray2D->blkTextureArrayImageView;
+    imageInfo.sampler = blockTextureArray2D->blkArraySampler;
+
+    VkDescriptorImageInfo fontImageInfo{};
+    fontImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    fontImageInfo.imageView = font->texture.textureImageView;
+    fontImageInfo.sampler = font->texture.textureSampler;
+
+    std::vector<VkDescriptorImageInfo> imageInfos(
+        NUM_DESCRIPTOR_COUNT_FOR_UI_TEXTURES);
+    for (uint32_t i = 0; i < NUM_DESCRIPTOR_COUNT_FOR_UI_TEXTURES; i++) {
+      imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+      imageInfos[i].imageView =
+          uiTextures[i].textureImageView; // your VkImageView array
+      imageInfos[i].sampler = uiTextures[i].textureSampler;
+    }
+
+    std::array<VkWriteDescriptorSet, 4> descriptorWrites{};
+>>>>>>> 196e0be (=font rendering)
 
     // ---- Image settings ----
     createInfo.minImageCount = imageCount;
@@ -628,6 +967,7 @@ void HelloTriangleApplication::createSwapChain()
         createInfo.pQueueFamilyIndices = nullptr; // Optional
     }
 
+<<<<<<< HEAD
     // how to transform the present
     // IE: tell vulkan how to handle rotations. We just use what the windowing system provides
     createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
@@ -647,6 +987,21 @@ void HelloTriangleApplication::createSwapChain()
     vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
     vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data());
+=======
+    descriptorWrites[3].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[3].dstSet = descriptorSets[i];
+    descriptorWrites[3].dstBinding = 3;
+    descriptorWrites[3].dstArrayElement = 0;
+    descriptorWrites[3].descriptorType =
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorWrites[3].descriptorCount = 1;
+    descriptorWrites[3].pImageInfo = &fontImageInfo;
+
+    vkUpdateDescriptorSets(device,
+                           static_cast<uint32_t>(descriptorWrites.size()),
+                           descriptorWrites.data(), 0, nullptr);
+  }
+>>>>>>> 196e0be (=font rendering)
 }
 
 // Images views: VkImage is just raw memory. Image views provide the GPU with all the neseccary context and information to present the data correctly
@@ -669,6 +1024,7 @@ void HelloTriangleApplication::createImageViews()
         createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
         createInfo.format = swapChainImageFormat;
 
+<<<<<<< HEAD
         // mapping the color channels to defaults
         // VK_COMPONENT_SWIZZLE_IDENTITY → use the original channel layout.
         createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -689,6 +1045,32 @@ void HelloTriangleApplication::createImageViews()
         }
     }
 }
+=======
+  VkDescriptorSetLayoutBinding fontTexturesBinding{};
+  fontTexturesBinding.binding = 3;
+  fontTexturesBinding.descriptorType =
+      VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  fontTexturesBinding.descriptorCount = 1;
+  fontTexturesBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+  fontTexturesBinding.pImmutableSamplers = nullptr;
+
+  VkDescriptorBindingFlags bindingFlags =
+      VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
+
+  VkDescriptorSetLayoutBindingFlagsCreateInfo flagsInfo{};
+  flagsInfo.sType =
+      VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+  flagsInfo.bindingCount = 4;
+  flagsInfo.pBindingFlags = &bindingFlags;
+
+  std::array<VkDescriptorSetLayoutBinding, 4> bindings = {
+      uboLayoutBinding, blkTexBinding, uiTexturesBinding, fontTexturesBinding};
+  VkDescriptorSetLayoutCreateInfo layoutInfo{};
+  layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+  layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+  layoutInfo.pBindings = bindings.data();
+  layoutInfo.pNext = nullptr;
+>>>>>>> 196e0be (=font rendering)
 
 // Render pass
 // It tells vulkan what attachment to use
@@ -1269,4 +1651,21 @@ void HelloTriangleApplication::createSyncObject()
             throw std::runtime_error("failed to create renderFinished semaphore!");
         }
     }
+}
+
+void HelloTriangleApplication::initFontLib() {
+  if (FT_Init_FreeType(&ft)) {
+    std::cout << "ERROR::FREETYPE Could not init FreeType lib" << std::endl;
+    cleanup();
+    exit(1);
+  }
+
+  FT_Face face;
+  if (FT_New_Face(ft, "/home/divyansh/MinecraftClone/fonts/arial.ttf", 0,
+                  &face)) {
+    std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+    FT_Done_Face(face);
+    exit(1);
+  }
+  FT_Done_Face(face);
 }

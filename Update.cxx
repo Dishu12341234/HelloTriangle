@@ -20,12 +20,19 @@ void HelloTriangleApplication::initGameObjects()
     context.presentQueue = presentQueue;
     context.commandPool = commandPool;
 
+<<<<<<< HEAD
     player = std::make_unique<Player>(context, &gameObjectPool);
     gameObjectPool.init(context);
 
     StandardBoxModel *testBlock = gameObjectPool.createNewBoxModelAndAppend({40, 30, 0}, {0, 1, 1, 1, 1, 1});
     StandardBoxModel *testBlock1 = gameObjectPool.createNewBoxModelAndAppend({41, 30, 0}, {2, 1, 1, 1, 1, 1});
     StandardBoxModel *testBlock2 = gameObjectPool.createNewBoxModelAndAppend({41, 31, 0}, {3, 1, 1, 1, 1, 1});
+=======
+  terrain = std::make_unique<Terrain>(context, gameObjectPool);
+  ui = std::move(UI(context));
+  font = std::make_unique<Fonts>(context, ft);
+  srand(87844057);
+>>>>>>> 196e0be (=font rendering)
 
     StandardBoxModel *testBlock3 = gameObjectPool.createNewBoxModelAndAppend({41, 31, 2}, {0, 1, 1, 1, 1, 1});
     // testBlock3->removeFace(FRONT);
